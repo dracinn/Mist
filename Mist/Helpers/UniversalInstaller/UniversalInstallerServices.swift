@@ -5,7 +5,7 @@
 import Foundation
 
 protocol InstallerProvider: Sendable {
-    var platform: InstallerPlatform { get }
+    var kind: MacOSInstallerKind { get }
 
     func validate(target: InstallerTarget) async throws
     func prepare(target: InstallerTarget) async throws
@@ -36,9 +36,11 @@ protocol OpenCoreManaging: Sendable {
     func deployEFI(from source: URL, to destination: URL) async throws
 }
 
-enum InstallerPlanningError: LocalizedError {
+enum InstallerPlanningError: LocalizedError, Equatable {
     case emptySelection
     case invalidDiskSize
+    case duplicateInstallerBuild(String)
+    case planSizeOverflow
     case targetTooLarge(String)
     case planExceedsDisk(required: UInt64, available: UInt64)
 
@@ -48,6 +50,10 @@ enum InstallerPlanningError: LocalizedError {
             "At least one installer target must be selected."
         case .invalidDiskSize:
             "The selected disk size is invalid."
+        case let .duplicateInstallerBuild(build):
+            "The macOS installer build \(build) was selected more than once."
+        case .planSizeOverflow:
+            "The requested installer plan is too large to calculate safely."
         case let .targetTooLarge(name):
             "The requested partition for \(name) is smaller than its minimum size."
         case let .planExceedsDisk(required, available):
@@ -72,6 +78,46 @@ struct InstallerPlanBuilder: Sendable {
             throw InstallerPlanningError.emptySelection
         }
 
+        try validate(targets: targets)
+
+        let plan: InstallerPlan = .init(
+            diskIdentifier: diskIdentifier,
+            diskSizeBytes: diskSizeBytes,
+            partitions: partitions(for: targets),
+            targets: targets,
+            reserveBytes: reserveBytes
+        )
+
+        let (requiredBytes, overflow): (UInt64, Bool) = plan.allocatedBytes.addingReportingOverflow(reserveBytes)
+        guard !overflow else {
+            throw InstallerPlanningError.planSizeOverflow
+        }
+
+        guard requiredBytes <= diskSizeBytes else {
+            throw InstallerPlanningError.planExceedsDisk(
+                required: requiredBytes,
+                available: diskSizeBytes
+            )
+        }
+
+        return plan
+    }
+
+    private func validate(targets: [InstallerTarget]) throws {
+        let builds: [String] = targets.map(\.build)
+        guard Set(builds).count == builds.count else {
+            let duplicateBuild: String = builds.first { build in
+                builds.filter { $0 == build }.count > 1
+            } ?? "unknown"
+            throw InstallerPlanningError.duplicateInstallerBuild(duplicateBuild)
+        }
+
+        for target in targets where target.minimumPartitionBytes < target.requiredBytes {
+            throw InstallerPlanningError.targetTooLarge(target.name)
+        }
+    }
+
+    private func partitions(for targets: [InstallerTarget]) -> [PlannedPartition] {
         var partitions: [PlannedPartition] = [
             PlannedPartition(
                 name: "EFI",
@@ -81,46 +127,16 @@ struct InstallerPlanBuilder: Sendable {
         ]
 
         for target in targets {
-            guard target.minimumPartitionBytes >= target.requiredBytes else {
-                throw InstallerPlanningError.targetTooLarge(target.name)
-            }
-
             partitions.append(
                 PlannedPartition(
                     name: target.name,
                     sizeBytes: target.minimumPartitionBytes,
-                    fileSystem: defaultFileSystem(for: target.platform),
+                    fileSystem: "HFS+",
                     targetID: target.id
                 )
             )
         }
 
-        let plan: InstallerPlan = .init(
-            diskIdentifier: diskIdentifier,
-            diskSizeBytes: diskSizeBytes,
-            partitions: partitions,
-            targets: targets,
-            reserveBytes: reserveBytes
-        )
-
-        guard plan.fitsOnDisk else {
-            throw InstallerPlanningError.planExceedsDisk(
-                required: plan.allocatedBytes + reserveBytes,
-                available: diskSizeBytes
-            )
-        }
-
-        return plan
-    }
-
-    private func defaultFileSystem(for platform: InstallerPlatform) -> String {
-        switch platform {
-        case .macOS, .recovery:
-            "HFS+"
-        case .windows:
-            "exFAT/NTFS"
-        case .linux, .utility, .custom:
-            "FAT32/exFAT"
-        }
+        return partitions
     }
 }
