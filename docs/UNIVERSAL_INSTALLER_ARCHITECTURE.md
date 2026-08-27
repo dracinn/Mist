@@ -30,6 +30,8 @@ Mist remains the application base. TINU, OC-Little-Translated, Hackintosh-for-Al
 
 The first milestone is intentionally non-destructive: models, protocols, planning, validation, and architecture only. Actual partitioning, EFI mounting, OpenCore deployment, ISO extraction, and hardware probing should be implemented behind these interfaces in follow-up commits with tests.
 
+Mist catalog installers are converted into macOS targets using their Apple build metadata and package source. The planner adds explicit working-space overhead, and `InstallerPlanPreview` exposes the proposed layout and remaining capacity without performing any disk operation.
+
 ## Current scope
 
 - `nativeMacIntel`
@@ -61,5 +63,4 @@ Linux, Windows, generic UEFI, Asahi, shared data partitions, and arbitrary custo
 - Add a read-only EFI detector/mounter abstraction.
 - Add a macOS provider wrapping Mist's existing installer creation path.
 - Add OpenCore configuration generation as a separate service.
-- Add catalog-to-target conversion for selected Mist installers.
-- Add a non-destructive preview of the complete multi-macOS partition plan.
+- Connect catalog multi-selection to the target factory and preview in the app UI.
