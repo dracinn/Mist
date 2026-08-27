@@ -1,6 +1,13 @@
 excluded:
   - .build
 
+file_name:
+  excluded:
+    - HardwareCompatibility.swift
+    - main.swift
+    - UniversalInstallerModels.swift
+    - UniversalInstallerServices.swift
+
 large_tuple:
   warning: 3
   error: 5

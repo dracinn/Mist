@@ -1,10 +1,10 @@
 name: Linting
 on:
   push:
-    paths: ["**.swift"]
+    paths: ["**.swift", ".swiftlint.yml", ".swiftformat", ".github/workflows/linting.yml"]
     branches: [main]
   pull_request:
-    paths: ["**.swift"]
+    paths: ["**.swift", ".swiftlint.yml", ".swiftformat", ".github/workflows/linting.yml"]
     branches: [main]
   workflow_dispatch:
 jobs:
@@ -16,9 +16,14 @@ jobs:
       - uses: swift-actions/setup-swift@v3
         with:
           swift-version: "6.3.1"
-      - uses: m-takuma/setup-swiftlint@1.0.0
-        with:
-          swiftlint-version: "0.63.2"
+      - name: Install SwiftLint 0.63.2
+        run: |
+          curl --fail --location --output "$RUNNER_TEMP/swiftlint.zip" https://github.com/realm/SwiftLint/releases/download/0.63.2/portable_swiftlint.zip
+          unzip -q "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
+          chmod +x "$RUNNER_TEMP/swiftlint/swiftlint"
+          echo "$RUNNER_TEMP/swiftlint" >> "$GITHUB_PATH"
+      - name: Install SwiftFormat
+        run: brew install swiftformat
       - name: Print SwiftLint version
         run: swiftlint --version
       - name: Run SwiftLint
@@ -33,8 +38,8 @@ jobs:
         run: |
           mkdir drstring-universal-apple-darwin
           tar --extract --file drstring-universal-apple-darwin.tar.gz --directory drstring-universal-apple-darwin
-      - name: Add DrString to $PATH
-        run: echo "$GITHUB_WORKSPACE/drstring-universal-apple-darwin" >> $GITHUB_PATH
+      - name: Add DrString to PATH
+        run: echo "$GITHUB_WORKSPACE/drstring-universal-apple-darwin" >> "$GITHUB_PATH"
       - name: Print DrString version
         run: drstring --version
       - name: Run DrString
