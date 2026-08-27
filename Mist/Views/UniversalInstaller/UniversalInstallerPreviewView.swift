@@ -12,10 +12,26 @@ struct UniversalInstallerPreviewView: View {
     @State private var selectedInstallerIDs: Set<String> = []
     @State private var bootStrategy: BootStrategy
     @State private var diskSizeGiB: Int = 64
+    @State private var physicalDisks: [PhysicalDisk] = []
+    @State private var selectedDiskIdentifier: String = ""
+    @State private var diskDiscoveryError: String?
+    @State private var isDiscoveringDisks: Bool = false
     private let diskSizesGiB: [Int] = [32, 64, 128, 256, 512]
 
     private var selectedInstallers: [Installer] {
         installers.filter { selectedInstallerIDs.contains($0.id) }
+    }
+
+    private var selectedDisk: PhysicalDisk? {
+        physicalDisks.first { $0.identifier == selectedDiskIdentifier }
+    }
+
+    private var previewDiskIdentifier: String {
+        selectedDisk?.identifier ?? "Capacity Preview"
+    }
+
+    private var previewDiskSizeBytes: UInt64 {
+        selectedDisk?.sizeBytes ?? UInt64(diskSizeGiB) * 1_024 * 1_024 * 1_024
     }
 
     private var previewResult: (preview: InstallerPlanPreview?, error: String?) {
@@ -27,8 +43,8 @@ struct UniversalInstallerPreviewView: View {
             let preview: InstallerPlanPreview = try MacOSInstallerPreviewBuilder().preview(
                 installers: selectedInstallers,
                 bootStrategy: bootStrategy,
-                diskIdentifier: "Preview",
-                diskSizeBytes: UInt64(diskSizeGiB) * 1_024 * 1_024 * 1_024
+                diskIdentifier: previewDiskIdentifier,
+                diskSizeBytes: previewDiskSizeBytes
             )
             return (preview, nil)
         } catch {
@@ -48,6 +64,9 @@ struct UniversalInstallerPreviewView: View {
             safetyFooter
         }
         .frame(width: 760, height: 560)
+        .task {
+            await refreshPhysicalDisks()
+        }
     }
 
     private var header: some View {
@@ -97,12 +116,7 @@ struct UniversalInstallerPreviewView: View {
                 }
             }
 
-            Picker("Drive capacity", selection: $diskSizeGiB) {
-                ForEach(diskSizesGiB, id: \.self) { size in
-                    Text("\(size) GiB")
-                        .tag(size)
-                }
-            }
+            diskSelection
 
             Divider()
             previewContent
@@ -110,6 +124,35 @@ struct UniversalInstallerPreviewView: View {
         }
         .padding()
         .frame(minWidth: 360)
+    }
+
+    private var diskSelection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                if physicalDisks.isEmpty {
+                    Picker("Preview capacity", selection: $diskSizeGiB) {
+                        ForEach(diskSizesGiB, id: \.self) { size in
+                            Text("\(size) GiB")
+                                .tag(size)
+                        }
+                    }
+                } else {
+                    Picker("External disk", selection: $selectedDiskIdentifier) {
+                        ForEach(physicalDisks) { disk in
+                            Text("\(disk.name) (\(disk.identifier), \(disk.busProtocol)) — \(disk.sizeBytes.bytesString())")
+                                .tag(disk.identifier)
+                        }
+                    }
+                }
+                refreshDisksButton
+            }
+
+            if let diskDiscoveryError: String = diskDiscoveryError {
+                Text(diskDiscoveryError)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
     }
 
     @ViewBuilder private var previewContent: some View {
@@ -148,6 +191,23 @@ struct UniversalInstallerPreviewView: View {
         .padding()
     }
 
+    private var refreshDisksButton: some View {
+        Button {
+            Task {
+                await refreshPhysicalDisks()
+            }
+        } label: {
+            if isDiscoveringDisks {
+                ProgressView()
+                    .controlSize(.small)
+            } else {
+                Image(systemName: "arrow.clockwise")
+            }
+        }
+        .disabled(isDiscoveringDisks)
+        .help("Refresh external physical disks")
+    }
+
     init(installers: [Installer]) {
         self.installers = installers
         let strategy: BootStrategy = Hardware.architecture == .appleSilicon ? .appleSilicon : .nativeMacIntel
@@ -175,6 +235,28 @@ struct UniversalInstallerPreviewView: View {
             Spacer()
             Text(bytes.bytesString())
                 .foregroundColor(.secondary)
+        }
+    }
+
+    @MainActor
+    private func refreshPhysicalDisks() async {
+        isDiscoveringDisks = true
+        defer {
+            isDiscoveringDisks = false
+        }
+
+        do {
+            let disks: [PhysicalDisk] = try await DiskutilPhysicalDiskDiscovery().externalPhysicalDisks()
+            physicalDisks = disks
+            diskDiscoveryError = nil
+
+            if !disks.contains(where: { $0.identifier == selectedDiskIdentifier }) {
+                selectedDiskIdentifier = disks.first?.identifier ?? ""
+            }
+        } catch {
+            physicalDisks = []
+            selectedDiskIdentifier = ""
+            diskDiscoveryError = error.localizedDescription
         }
     }
 }

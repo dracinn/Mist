@@ -28,6 +28,17 @@ enum MacOSInstallerKind: String, Codable, CaseIterable, Sendable {
     case recovery
 }
 
+struct PhysicalDisk: Identifiable, Hashable, Sendable {
+    var id: String {
+        identifier
+    }
+
+    var identifier: String
+    var name: String
+    var sizeBytes: UInt64
+    var busProtocol: String
+}
+
 // swiftlint:disable:next file_types_order
 struct InstallerTarget: Identifiable, Codable, Hashable, Sendable {
     let id: UUID

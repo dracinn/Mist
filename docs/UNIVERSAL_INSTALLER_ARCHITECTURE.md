@@ -34,6 +34,8 @@ Mist catalog installers are converted into macOS targets using their Apple build
 
 The installer catalog toolbar exposes a preview-only multi-selection sheet. It lets users compare a proposed EFI and multi-macOS partition layout for a chosen capacity and boot strategy, but deliberately provides no disk-selection or execution control.
 
+The preview may read external physical-disk metadata through `diskutil` plist output. Discovery is restricted to writable, external, whole, physical devices with nonzero capacity; internal and virtual disks are excluded. This path invokes only `diskutil list` and `diskutil info` and cannot mount, unmount, erase, or partition media.
+
 ## Current scope
 
 - `nativeMacIntel`
@@ -65,5 +67,5 @@ Linux, Windows, generic UEFI, Asahi, shared data partitions, and arbitrary custo
 - Add a read-only EFI detector/mounter abstraction.
 - Add a macOS provider wrapping Mist's existing installer creation path.
 - Add OpenCore configuration generation as a separate service.
-- Add read-only physical disk discovery and use the selected disk's reported capacity in the preview.
 - Add per-installer boot-strategy overrides for mixed target hardware plans.
+- Add a second, explicit safety review before any future disk-writing implementation is designed.
