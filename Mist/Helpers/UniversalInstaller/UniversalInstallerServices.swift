@@ -1,4 +1,3 @@
-// swiftlint:disable:this file_name
 //  UniversalInstallerServices.swift
 //  Mist
 //

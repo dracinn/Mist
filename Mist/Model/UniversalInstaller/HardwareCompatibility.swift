@@ -1,9 +1,6 @@
-// swiftlint:disable:this file_name
 //  HardwareCompatibility.swift
 //  Mist
 //
-
-// swiftlint:disable file_types_order
 
 import Foundation
 
@@ -28,6 +25,7 @@ enum HardwareSupportStatus: String, Codable, CaseIterable, Sendable {
     case requiresConfiguration
 }
 
+// swiftlint:disable:next file_types_order
 struct HardwareDevice: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     var category: HardwareCategory
@@ -86,5 +84,3 @@ struct CompatibilityReport: Codable, Hashable, Sendable {
         blockingIssues.isEmpty && !results.contains { $0.status == .unsupported }
     }
 }
-
-// swiftlint:enable file_types_order

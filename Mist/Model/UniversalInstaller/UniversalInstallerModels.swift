@@ -1,11 +1,8 @@
-// swiftlint:disable:this file_name
 //  UniversalInstallerModels.swift
 //  Mist
 //
 //  Initial architecture scaffold for multi-installer and OpenCore support.
 //
-
-// swiftlint:disable file_types_order
 
 import Foundation
 
@@ -26,6 +23,7 @@ enum InstallerPlatform: String, Codable, CaseIterable, Sendable {
     case custom
 }
 
+// swiftlint:disable:next file_types_order
 struct InstallerTarget: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     var name: String
@@ -91,5 +89,3 @@ struct InstallerPlan: Codable, Hashable, Sendable {
         allocatedBytes + reserveBytes <= diskSizeBytes
     }
 }
-
-// swiftlint:enable file_types_order
