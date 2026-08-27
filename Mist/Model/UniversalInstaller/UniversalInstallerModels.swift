@@ -93,3 +93,23 @@ struct InstallerPlan: Codable, Hashable, Sendable {
         return !overflow && requiredBytes <= diskSizeBytes
     }
 }
+
+struct InstallerPlanPreview: Equatable, Sendable {
+    var diskIdentifier: String
+    var diskSizeBytes: UInt64
+    var allocatedBytes: UInt64
+    var reserveBytes: UInt64
+    var remainingBytes: UInt64
+    var partitions: [PlannedPartition]
+
+    init(plan: InstallerPlan) {
+        let (usedBytes, overflow): (UInt64, Bool) = plan.allocatedBytes.addingReportingOverflow(plan.reserveBytes)
+
+        diskIdentifier = plan.diskIdentifier
+        diskSizeBytes = plan.diskSizeBytes
+        allocatedBytes = plan.allocatedBytes
+        reserveBytes = plan.reserveBytes
+        remainingBytes = overflow || usedBytes > plan.diskSizeBytes ? 0 : plan.diskSizeBytes - usedBytes
+        partitions = plan.partitions
+    }
+}

@@ -36,6 +36,91 @@ protocol OpenCoreManaging: Sendable {
     func deployEFI(from source: URL, to destination: URL) async throws
 }
 
+enum MacOSInstallerTargetError: LocalizedError, Equatable {
+    case invalidCatalogMetadata
+    case invalidPackageSize
+    case missingInstallerSource
+    case sizeOverflow
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidCatalogMetadata:
+            "The selected macOS catalog entry is missing its version or build."
+        case .invalidPackageSize:
+            "The selected macOS catalog entry contains an invalid package size."
+        case .missingInstallerSource:
+            "The selected macOS catalog entry has no usable installer source."
+        case .sizeOverflow:
+            "The selected macOS installer is too large to calculate safely."
+        }
+    }
+}
+
+struct MacOSInstallerTargetFactory: Sendable {
+    var minimumPartitionBytes: UInt64 = 20 * 1_024 * 1_024 * 1_024
+    var partitionOverheadBytes: UInt64 = 4 * 1_024 * 1_024 * 1_024
+
+    func makeTarget(
+        from installer: Installer,
+        bootStrategy: BootStrategy
+    ) throws -> InstallerTarget {
+        guard
+            !installer.version.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            !installer.build.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            throw MacOSInstallerTargetError.invalidCatalogMetadata
+        }
+
+        let requiredBytes: UInt64 = try packageBytes(for: installer)
+        let (recommendedBytes, overflow): (UInt64, Bool) = requiredBytes.addingReportingOverflow(partitionOverheadBytes)
+        guard !overflow else {
+            throw MacOSInstallerTargetError.sizeOverflow
+        }
+
+        return try InstallerTarget(
+            name: "Install \(installer.name)",
+            version: installer.version,
+            build: installer.build,
+            kind: .fullInstaller,
+            bootStrategy: bootStrategy,
+            requiredBytes: requiredBytes,
+            minimumPartitionBytes: max(minimumPartitionBytes, recommendedBytes),
+            source: sourceURL(for: installer)
+        )
+    }
+
+    private func packageBytes(for installer: Installer) throws -> UInt64 {
+        try installer.packages.reduce(0) { totalBytes, package in
+            guard package.size >= 0 else {
+                throw MacOSInstallerTargetError.invalidPackageSize
+            }
+
+            let (result, overflow): (UInt64, Bool) = totalBytes.addingReportingOverflow(UInt64(package.size))
+            guard !overflow else {
+                throw MacOSInstallerTargetError.sizeOverflow
+            }
+            return result
+        }
+    }
+
+    private func sourceURL(for installer: Installer) throws -> URL {
+        let preferredPackage: Package? = installer.packages.first { package in
+            package.filename == "InstallAssistant.pkg"
+        } ?? installer.packages.first
+
+        guard
+            let source = preferredPackage?.url,
+            let sourceURL: URL = URL(string: source),
+            let scheme: String = sourceURL.scheme,
+            scheme.lowercased() == "https"
+        else {
+            throw MacOSInstallerTargetError.missingInstallerSource
+        }
+
+        return sourceURL
+    }
+}
+
 enum InstallerPlanningError: LocalizedError, Equatable {
     case emptySelection
     case invalidDiskSize
@@ -101,6 +186,19 @@ struct InstallerPlanBuilder: Sendable {
         }
 
         return plan
+    }
+
+    func preview(
+        diskIdentifier: String,
+        diskSizeBytes: UInt64,
+        targets: [InstallerTarget]
+    ) throws -> InstallerPlanPreview {
+        let plan: InstallerPlan = try build(
+            diskIdentifier: diskIdentifier,
+            diskSizeBytes: diskSizeBytes,
+            targets: targets
+        )
+        return InstallerPlanPreview(plan: plan)
     }
 
     private func validate(targets: [InstallerTarget]) throws {
