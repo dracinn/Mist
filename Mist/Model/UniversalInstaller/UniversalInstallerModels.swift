@@ -5,6 +5,8 @@
 //  Initial architecture scaffold for multi-installer and OpenCore support.
 //
 
+// swiftlint:disable file_name file_types_order
+
 import Foundation
 
 enum BootStrategy: String, Codable, CaseIterable, Sendable {
