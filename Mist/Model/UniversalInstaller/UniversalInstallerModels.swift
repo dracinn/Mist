@@ -1,86 +1,91 @@
 //
-//  HardwareCompatibility.swift
+//  UniversalInstallerModels.swift
 //  Mist
+//
+//  Initial architecture scaffold for multi-installer and OpenCore support.
 //
 
 import Foundation
 
-enum HardwareCategory: String, Codable, CaseIterable, Sendable {
-    case cpu
-    case gpu
-    case audio
-    case ethernet
-    case wifi
-    case bluetooth
-    case storage
-    case usb
-    case input
-    case acpi
-    case other
+enum BootStrategy: String, Codable, CaseIterable, Sendable {
+    case nativeMacIntel
+    case openCore
+    case genericUEFI
+    case appleSilicon
+    case asahi
 }
 
-enum HardwareSupportStatus: String, Codable, CaseIterable, Sendable {
-    case supported
-    case unsupported
-    case unknown
-    case requiresConfiguration
+enum InstallerPlatform: String, Codable, CaseIterable, Sendable {
+    case macOS
+    case linux
+    case windows
+    case recovery
+    case utility
+    case custom
 }
 
-struct HardwareDevice: Identifiable, Codable, Hashable, Sendable {
+struct InstallerTarget: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
-    var category: HardwareCategory
     var name: String
-    var vendorID: String?
-    var deviceID: String?
-    var subsystemID: String?
+    var platform: InstallerPlatform
+    var bootStrategy: BootStrategy
+    var source: URL?
+    var requiredBytes: UInt64
+    var minimumPartitionBytes: UInt64
 
     init(
-        id: UUID = UUID(),
-        category: HardwareCategory,
         name: String,
-        vendorID: String? = nil,
-        deviceID: String? = nil,
-        subsystemID: String? = nil
+        platform: InstallerPlatform,
+        bootStrategy: BootStrategy,
+        requiredBytes: UInt64,
+        minimumPartitionBytes: UInt64,
+        source: URL? = nil,
+        id: UUID = UUID()
     ) {
         self.id = id
-        self.category = category
         self.name = name
-        self.vendorID = vendorID
-        self.deviceID = deviceID
-        self.subsystemID = subsystemID
+        self.platform = platform
+        self.bootStrategy = bootStrategy
+        self.source = source
+        self.requiredBytes = requiredBytes
+        self.minimumPartitionBytes = minimumPartitionBytes
     }
 }
 
-struct HardwareProfile: Codable, Hashable, Sendable {
-    var schemaVersion: Int = 1
-    var modelName: String?
-    var boardName: String?
-    var devices: [HardwareDevice]
-    var acpiTableNames: [String]
+struct PlannedPartition: Identifiable, Codable, Hashable, Sendable {
+    let id: UUID
+    var name: String
+    var sizeBytes: UInt64
+    var fileSystem: String
+    var targetID: UUID?
+
+    init(
+        name: String,
+        sizeBytes: UInt64,
+        fileSystem: String,
+        targetID: UUID? = nil,
+        id: UUID = UUID()
+    ) {
+        self.id = id
+        self.name = name
+        self.sizeBytes = sizeBytes
+        self.fileSystem = fileSystem
+        self.targetID = targetID
+    }
 }
 
-struct CompatibilityRequirement: Codable, Hashable, Sendable {
-    var component: String
-    var reason: String
-    var required: Bool
-}
+struct InstallerPlan: Codable, Hashable, Sendable {
+    var diskIdentifier: String
+    var diskSizeBytes: UInt64
+    var partitions: [PlannedPartition]
+    var targets: [InstallerTarget]
+    var reserveBytes: UInt64
 
-struct HardwareCompatibilityResult: Codable, Hashable, Sendable {
-    var device: HardwareDevice
-    var status: HardwareSupportStatus
-    var minimumOSVersion: String?
-    var maximumOSVersion: String?
-    var requirements: [CompatibilityRequirement]
-    var notes: [String]
-}
+    var allocatedBytes: UInt64 {
+        partitions.reduce(0) { $0 + $1.sizeBytes }
+    }
 
-struct CompatibilityReport: Codable, Hashable, Sendable {
-    var targetName: String
-    var results: [HardwareCompatibilityResult]
-    var warnings: [String]
-    var blockingIssues: [String]
-
-    var isBuildable: Bool {
-        blockingIssues.isEmpty && !results.contains { $0.status == .unsupported }
+    var fitsOnDisk: Bool {
+        allocatedBytes + reserveBytes <= diskSizeBytes
     }
 }
