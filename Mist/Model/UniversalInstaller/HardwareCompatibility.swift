@@ -3,6 +3,8 @@
 //  Mist
 //
 
+// swiftlint:disable file_name file_types_order
+
 import Foundation
 
 enum HardwareCategory: String, Codable, CaseIterable, Sendable {
