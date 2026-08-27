@@ -79,6 +79,21 @@ final class UniversalInstallerTests: XCTestCase {
         }
     }
 
+    func testCatalogSelectionBuildsMultiMacOSPreview() throws {
+        let installers: [Installer] = [.example] + Installer.legacyInstallers.prefix(1)
+        let preview: InstallerPlanPreview = try MacOSInstallerPreviewBuilder().preview(
+            installers: installers,
+            bootStrategy: .openCore,
+            diskIdentifier: "Preview",
+            diskSizeBytes: 64 * 1_024 * 1_024 * 1_024
+        )
+
+        XCTAssertEqual(preview.diskIdentifier, "Preview")
+        XCTAssertEqual(preview.partitions.count, 3)
+        XCTAssertEqual(preview.partitions.first?.name, "EFI")
+        XCTAssertGreaterThan(preview.remainingBytes, 0)
+    }
+
     func testPlanIncludesEFIAndMultipleMacOSInstallers() throws {
         let tahoe: InstallerTarget = .init(
             name: "Install macOS Tahoe",

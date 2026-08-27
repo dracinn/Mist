@@ -10,6 +10,17 @@ enum BootStrategy: String, Codable, CaseIterable, Sendable {
     case nativeMacIntel
     case openCore
     case appleSilicon
+
+    var description: String {
+        switch self {
+        case .nativeMacIntel:
+            "Native Intel Mac"
+        case .openCore:
+            "OpenCore"
+        case .appleSilicon:
+            "Apple Silicon"
+        }
+    }
 }
 
 enum MacOSInstallerKind: String, Codable, CaseIterable, Sendable {

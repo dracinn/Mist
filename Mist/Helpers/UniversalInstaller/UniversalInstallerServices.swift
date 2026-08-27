@@ -121,6 +121,31 @@ struct MacOSInstallerTargetFactory: Sendable {
     }
 }
 
+struct MacOSInstallerPreviewBuilder: Sendable {
+    var targetFactory: MacOSInstallerTargetFactory = .init()
+    var planBuilder: InstallerPlanBuilder = .init()
+
+    func preview(
+        installers: [Installer],
+        bootStrategy: BootStrategy,
+        diskIdentifier: String,
+        diskSizeBytes: UInt64
+    ) throws -> InstallerPlanPreview {
+        let targets: [InstallerTarget] = try installers.map { installer in
+            try targetFactory.makeTarget(
+                from: installer,
+                bootStrategy: bootStrategy
+            )
+        }
+
+        return try planBuilder.preview(
+            diskIdentifier: diskIdentifier,
+            diskSizeBytes: diskSizeBytes,
+            targets: targets
+        )
+    }
+}
+
 enum InstallerPlanningError: LocalizedError, Equatable {
     case emptySelection
     case invalidDiskSize
