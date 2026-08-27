@@ -10,16 +10,26 @@ struct UniversalInstallerPreviewView: View {
     private var dismiss: DismissAction
     var installers: [Installer]
     @State private var selectedInstallerIDs: Set<String> = []
-    @State private var bootStrategy: BootStrategy
+    @State private var bootStrategies: [String: BootStrategy] = [:]
     @State private var diskSizeGiB: Int = 64
     @State private var physicalDisks: [PhysicalDisk] = []
     @State private var selectedDiskIdentifier: String = ""
     @State private var diskDiscoveryError: String?
     @State private var isDiscoveringDisks: Bool = false
     private let diskSizesGiB: [Int] = [32, 64, 128, 256, 512]
+    private let defaultBootStrategy: BootStrategy
 
     private var selectedInstallers: [Installer] {
         installers.filter { selectedInstallerIDs.contains($0.id) }
+    }
+
+    private var selections: [MacOSInstallerSelection] {
+        selectedInstallers.map { installer in
+            MacOSInstallerSelection(
+                installer: installer,
+                bootStrategy: bootStrategies[installer.id] ?? defaultBootStrategy
+            )
+        }
     }
 
     private var selectedDisk: PhysicalDisk? {
@@ -41,8 +51,7 @@ struct UniversalInstallerPreviewView: View {
 
         do {
             let preview: InstallerPlanPreview = try MacOSInstallerPreviewBuilder().preview(
-                installers: selectedInstallers,
-                bootStrategy: bootStrategy,
+                selections: selections,
                 diskIdentifier: previewDiskIdentifier,
                 diskSizeBytes: previewDiskSizeBytes
             )
@@ -92,15 +101,28 @@ struct UniversalInstallerPreviewView: View {
             Text("macOS Installers")
                 .font(.headline)
             List(installers) { installer in
-                Toggle(isOn: selectionBinding(for: installer)) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(installer.name) \(installer.version)")
-                        Text("Build \(installer.build) · \(installer.size.bytesString())")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle(isOn: selectionBinding(for: installer)) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(installer.name) \(installer.version)")
+                            Text("Build \(installer.build) · \(installer.size.bytesString())")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .toggleStyle(.checkbox)
+
+                    if selectedInstallerIDs.contains(installer.id) {
+                        Picker("Boot strategy", selection: bootStrategyBinding(for: installer)) {
+                            ForEach(BootStrategy.allCases, id: \.self) { strategy in
+                                Text(strategy.description)
+                                    .tag(strategy)
+                            }
+                        }
+                        .labelsHidden()
+                        .padding(.leading, 20)
                     }
                 }
-                .toggleStyle(.checkbox)
             }
         }
         .padding()
@@ -109,13 +131,6 @@ struct UniversalInstallerPreviewView: View {
 
     private var planConfiguration: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Picker("Boot strategy", selection: $bootStrategy) {
-                ForEach(BootStrategy.allCases, id: \.self) { strategy in
-                    Text(strategy.description)
-                        .tag(strategy)
-                }
-            }
-
             diskSelection
 
             Divider()
@@ -210,11 +225,17 @@ struct UniversalInstallerPreviewView: View {
 
     init(installers: [Installer]) {
         self.installers = installers
-        let strategy: BootStrategy = Hardware.architecture == .appleSilicon ? .appleSilicon : .nativeMacIntel
-        _bootStrategy = State(initialValue: strategy)
+        defaultBootStrategy = Hardware.architecture == .appleSilicon ? .appleSilicon : .nativeMacIntel
     }
+}
 
-    private func selectionBinding(for installer: Installer) -> Binding<Bool> {
+private extension UniversalInstallerPreviewView {
+    /// Binds an installer row to the current multi-selection.
+    ///
+    /// - Parameter installer: The catalog installer represented by the row.
+    ///
+    /// - Returns: A binding that adds or removes the installer selection.
+    func selectionBinding(for installer: Installer) -> Binding<Bool> {
         Binding(
             get: {
                 selectedInstallerIDs.contains(installer.id)
@@ -222,14 +243,39 @@ struct UniversalInstallerPreviewView: View {
             set: { selected in
                 if selected {
                     selectedInstallerIDs.insert(installer.id)
+                    bootStrategies[installer.id] = bootStrategies[installer.id] ?? defaultBootStrategy
                 } else {
                     selectedInstallerIDs.remove(installer.id)
+                    bootStrategies.removeValue(forKey: installer.id)
                 }
             }
         )
     }
 
-    private func sizeRow(_ label: String, bytes: UInt64) -> some View {
+    /// Binds an installer row to its independently selected boot strategy.
+    ///
+    /// - Parameter installer: The selected catalog installer.
+    ///
+    /// - Returns: A binding to the installer's boot strategy.
+    func bootStrategyBinding(for installer: Installer) -> Binding<BootStrategy> {
+        Binding(
+            get: {
+                bootStrategies[installer.id] ?? defaultBootStrategy
+            },
+            set: { strategy in
+                bootStrategies[installer.id] = strategy
+            }
+        )
+    }
+
+    /// Displays a labeled byte count in the plan summary.
+    ///
+    /// - Parameters:
+    ///   - label: The summary row label.
+    ///   - bytes: The byte count to format.
+    ///
+    /// - Returns: A summary row containing the label and formatted byte count.
+    func sizeRow(_ label: String, bytes: UInt64) -> some View {
         HStack {
             Text(label)
             Spacer()
@@ -238,8 +284,9 @@ struct UniversalInstallerPreviewView: View {
         }
     }
 
+    /// Refreshes the read-only list of eligible external physical disks.
     @MainActor
-    private func refreshPhysicalDisks() async {
+    func refreshPhysicalDisks() async {
         isDiscoveringDisks = true
         defer {
             isDiscoveringDisks = false

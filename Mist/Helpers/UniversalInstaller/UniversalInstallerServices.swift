@@ -121,20 +121,27 @@ struct MacOSInstallerTargetFactory: Sendable {
     }
 }
 
+/// One Apple catalog installer and the boot strategy intended for that target.
+struct MacOSInstallerSelection {
+    /// The selected Mist catalog installer.
+    var installer: Installer
+    /// The boot path to use for this installer target.
+    var bootStrategy: BootStrategy
+}
+
 struct MacOSInstallerPreviewBuilder: Sendable {
     var targetFactory: MacOSInstallerTargetFactory = .init()
     var planBuilder: InstallerPlanBuilder = .init()
 
     func preview(
-        installers: [Installer],
-        bootStrategy: BootStrategy,
+        selections: [MacOSInstallerSelection],
         diskIdentifier: String,
         diskSizeBytes: UInt64
     ) throws -> InstallerPlanPreview {
-        let targets: [InstallerTarget] = try installers.map { installer in
+        let targets: [InstallerTarget] = try selections.map { selection in
             try targetFactory.makeTarget(
-                from: installer,
-                bootStrategy: bootStrategy
+                from: selection.installer,
+                bootStrategy: selection.bootStrategy
             )
         }
 

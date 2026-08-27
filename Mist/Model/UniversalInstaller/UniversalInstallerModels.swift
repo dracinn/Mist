@@ -123,6 +123,7 @@ struct InstallerPlanPreview: Equatable, Sendable {
     var reserveBytes: UInt64
     var remainingBytes: UInt64
     var partitions: [PlannedPartition]
+    var targets: [InstallerTarget]
 
     init(plan: InstallerPlan) {
         let (usedBytes, overflow): (UInt64, Bool) = plan.allocatedBytes.addingReportingOverflow(plan.reserveBytes)
@@ -133,5 +134,6 @@ struct InstallerPlanPreview: Equatable, Sendable {
         reserveBytes = plan.reserveBytes
         remainingBytes = overflow || usedBytes > plan.diskSizeBytes ? 0 : plan.diskSizeBytes - usedBytes
         partitions = plan.partitions
+        targets = plan.targets
     }
 }

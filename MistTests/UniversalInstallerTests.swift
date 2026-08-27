@@ -81,9 +81,12 @@ final class UniversalInstallerTests: XCTestCase {
 
     func testCatalogSelectionBuildsMultiMacOSPreview() throws {
         let installers: [Installer] = [.example] + Installer.legacyInstallers.prefix(1)
+        let selections: [MacOSInstallerSelection] = [
+            MacOSInstallerSelection(installer: installers[0], bootStrategy: .openCore),
+            MacOSInstallerSelection(installer: installers[1], bootStrategy: .nativeMacIntel)
+        ]
         let preview: InstallerPlanPreview = try MacOSInstallerPreviewBuilder().preview(
-            installers: installers,
-            bootStrategy: .openCore,
+            selections: selections,
             diskIdentifier: "Preview",
             diskSizeBytes: 64 * 1_024 * 1_024 * 1_024
         )
@@ -91,6 +94,7 @@ final class UniversalInstallerTests: XCTestCase {
         XCTAssertEqual(preview.diskIdentifier, "Preview")
         XCTAssertEqual(preview.partitions.count, 3)
         XCTAssertEqual(preview.partitions.first?.name, "EFI")
+        XCTAssertEqual(preview.targets.map(\.bootStrategy), [.openCore, .nativeMacIntel])
         XCTAssertGreaterThan(preview.remainingBytes, 0)
     }
 
