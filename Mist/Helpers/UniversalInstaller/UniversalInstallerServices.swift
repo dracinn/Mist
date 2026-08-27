@@ -1,9 +1,7 @@
-//
+// swiftlint:disable:this file_name
 //  UniversalInstallerServices.swift
 //  Mist
 //
-
-// swiftlint:disable file_name file_types_order
 
 import Foundation
 
@@ -75,7 +73,7 @@ struct InstallerPlanBuilder: Sendable {
             throw InstallerPlanningError.emptySelection
         }
 
-        var partitions = [
+        var partitions: [PlannedPartition] = [
             PlannedPartition(
                 name: "EFI",
                 sizeBytes: efiPartitionBytes,
@@ -98,7 +96,7 @@ struct InstallerPlanBuilder: Sendable {
             )
         }
 
-        let plan = InstallerPlan(
+        let plan: InstallerPlan = InstallerPlan(
             diskIdentifier: diskIdentifier,
             diskSizeBytes: diskSizeBytes,
             partitions: partitions,

@@ -3,8 +3,8 @@
 //  MistTests
 //
 
-import XCTest
 @testable import Mist
+import XCTest
 
 final class UniversalInstallerTests: XCTestCase {
     func testPlanIncludesEFIAndTargets() throws {

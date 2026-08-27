@@ -1,11 +1,11 @@
-//
+// swiftlint:disable:this file_name
 //  UniversalInstallerModels.swift
 //  Mist
 //
 //  Initial architecture scaffold for multi-installer and OpenCore support.
 //
 
-// swiftlint:disable file_name file_types_order
+// swiftlint:disable file_types_order
 
 import Foundation
 
@@ -91,3 +91,5 @@ struct InstallerPlan: Codable, Hashable, Sendable {
         allocatedBytes + reserveBytes <= diskSizeBytes
     }
 }
+
+// swiftlint:enable file_types_order

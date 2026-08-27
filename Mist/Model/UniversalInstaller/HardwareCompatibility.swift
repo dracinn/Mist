@@ -1,9 +1,9 @@
-//
+// swiftlint:disable:this file_name
 //  HardwareCompatibility.swift
 //  Mist
 //
 
-// swiftlint:disable file_name file_types_order
+// swiftlint:disable file_types_order
 
 import Foundation
 
@@ -86,3 +86,5 @@ struct CompatibilityReport: Codable, Hashable, Sendable {
         blockingIssues.isEmpty && !results.contains { $0.status == .unsupported }
     }
 }
+
+// swiftlint:enable file_types_order
