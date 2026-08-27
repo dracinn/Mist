@@ -24,6 +24,7 @@ struct ContentView: View {
     @State private var openPanel: NSOpenPanel = .init()
     @State private var savePanel: NSSavePanel = .init()
     @State private var copiedToClipboard: Bool = false
+    @State private var showMultiMacOSPreview: Bool = false
     @StateObject private var taskManager: TaskManager = .shared
     private var filteredFirmwares: [Firmware] {
         var filteredFirmwares: [Firmware] = firmwares
@@ -127,10 +128,21 @@ struct ContentView: View {
                     .foregroundColor(.accentColor)
             }
             .help("Show Mist Log")
+            Button {
+                showMultiMacOSPreview = true
+            } label: {
+                Label("Plan Multi-macOS Drive", systemImage: "externaldrive.badge.plus")
+                    .foregroundColor(.accentColor)
+            }
+            .disabled(downloadType != .installer || filteredInstallers.isEmpty)
+            .help("Preview a drive with multiple macOS installers")
         }
         .searchable(text: $searchString)
         .sheet(isPresented: $refreshing) {
             RefreshView(firmwares: $firmwares, installers: $installers)
+        }
+        .sheet(isPresented: $showMultiMacOSPreview) {
+            UniversalInstallerPreviewView(installers: filteredInstallers)
         }
         .onAppear {
             refresh()

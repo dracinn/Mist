@@ -155,6 +155,7 @@
 		AA0000010000000000000002 /* HardwareCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000010000000000000002 /* HardwareCompatibility.swift */; };
 		AA0000010000000000000003 /* UniversalInstallerServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000010000000000000003 /* UniversalInstallerServices.swift */; };
 		AA0000010000000000000004 /* UniversalInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000010000000000000004 /* UniversalInstallerTests.swift */; };
+		EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -328,6 +329,7 @@
 		BB0000010000000000000002 /* HardwareCompatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareCompatibility.swift; sourceTree = "<group>"; };
 		BB0000010000000000000003 /* UniversalInstallerServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerServices.swift; sourceTree = "<group>"; };
 		BB0000010000000000000004 /* UniversalInstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerTests.swift; sourceTree = "<group>"; };
+		FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerPreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -490,6 +492,7 @@
 		390451C42856E7FD00E0B563 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				EE0000010000000000000002 /* UniversalInstaller */,
 				390451AB2856E1D900E0B563 /* ContentView.swift */,
 				393D8028286EB4D6008AA8E3 /* EmptyCollectionView.swift */,
 				393F35C128641E1F005B7165 /* HeaderView.swift */,
@@ -503,6 +506,14 @@
 				39FF05F12859849200A86670 /* Components */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		EE0000010000000000000002 /* UniversalInstaller */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */,
+			);
+			path = UniversalInstaller;
 			sourceTree = "<group>";
 		};
 		3935F4A0286ACCE100760AB0 /* List */ = {
@@ -858,6 +869,7 @@
 				AA0000010000000000000001 /* UniversalInstallerModels.swift in Sources */,
 				AA0000010000000000000002 /* HardwareCompatibility.swift in Sources */,
 				AA0000010000000000000003 /* UniversalInstallerServices.swift in Sources */,
+				EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */,
 				39FF05F02859848500A86670 /* SettingsView.swift in Sources */,
 				39CF562A2861E1CB006FB5D2 /* DirectoryRemover.swift in Sources */,
 				577267AE2A45734700434B2C /* SettingsInstallersCacheTableView.swift in Sources */,

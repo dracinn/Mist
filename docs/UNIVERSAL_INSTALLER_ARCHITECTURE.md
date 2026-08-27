@@ -32,6 +32,8 @@ The first milestone is intentionally non-destructive: models, protocols, plannin
 
 Mist catalog installers are converted into macOS targets using their Apple build metadata and package source. The planner adds explicit working-space overhead, and `InstallerPlanPreview` exposes the proposed layout and remaining capacity without performing any disk operation.
 
+The installer catalog toolbar exposes a preview-only multi-selection sheet. It lets users compare a proposed EFI and multi-macOS partition layout for a chosen capacity and boot strategy, but deliberately provides no disk-selection or execution control.
+
 ## Current scope
 
 - `nativeMacIntel`
@@ -63,4 +65,5 @@ Linux, Windows, generic UEFI, Asahi, shared data partitions, and arbitrary custo
 - Add a read-only EFI detector/mounter abstraction.
 - Add a macOS provider wrapping Mist's existing installer creation path.
 - Add OpenCore configuration generation as a separate service.
-- Connect catalog multi-selection to the target factory and preview in the app UI.
+- Add read-only physical disk discovery and use the selected disk's reported capacity in the preview.
+- Add per-installer boot-strategy overrides for mixed target hardware plans.
