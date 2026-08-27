@@ -8,7 +8,7 @@ import XCTest
 
 final class UniversalInstallerTests: XCTestCase {
     func testPlanIncludesEFIAndTargets() throws {
-        let target: InstallerTarget = InstallerTarget(
+        let target = InstallerTarget(
             name: "macOS Installer",
             platform: .macOS,
             bootStrategy: .openCore,
@@ -16,7 +16,7 @@ final class UniversalInstallerTests: XCTestCase {
             minimumPartitionBytes: 20 * 1_024 * 1_024 * 1_024
         )
 
-        let plan: InstallerPlan = try InstallerPlanBuilder().build(
+        let plan = try InstallerPlanBuilder().build(
             diskIdentifier: "disk99",
             diskSizeBytes: 64 * 1_024 * 1_024 * 1_024,
             targets: [target]
@@ -28,7 +28,7 @@ final class UniversalInstallerTests: XCTestCase {
     }
 
     func testPlanRejectsInsufficientDiskSpace() {
-        let target: InstallerTarget = InstallerTarget(
+        let target = InstallerTarget(
             name: "Large Installer",
             platform: .linux,
             bootStrategy: .genericUEFI,
@@ -46,8 +46,8 @@ final class UniversalInstallerTests: XCTestCase {
     }
 
     func testUnsupportedHardwareBlocksBuild() {
-        let device: HardwareDevice = HardwareDevice(category: .gpu, name: "Unsupported GPU")
-        let result: HardwareCompatibilityResult = HardwareCompatibilityResult(
+        let device = HardwareDevice(category: .gpu, name: "Unsupported GPU")
+        let result = HardwareCompatibilityResult(
             device: device,
             status: .unsupported,
             minimumOSVersion: nil,
@@ -55,7 +55,7 @@ final class UniversalInstallerTests: XCTestCase {
             requirements: [],
             notes: []
         )
-        let report: CompatibilityReport = CompatibilityReport(
+        let report = CompatibilityReport(
             targetName: "macOS",
             results: [result],
             warnings: [],

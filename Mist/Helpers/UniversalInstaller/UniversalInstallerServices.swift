@@ -46,13 +46,13 @@ enum InstallerPlanningError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .emptySelection:
-            return "At least one installer target must be selected."
+            "At least one installer target must be selected."
         case .invalidDiskSize:
-            return "The selected disk size is invalid."
+            "The selected disk size is invalid."
         case let .targetTooLarge(name):
-            return "The requested partition for \(name) is smaller than its minimum size."
+            "The requested partition for \(name) is smaller than its minimum size."
         case let .planExceedsDisk(required, available):
-            return "The installer plan requires \(required) bytes but the disk has \(available) bytes available."
+            "The installer plan requires \(required) bytes but the disk has \(available) bytes available."
         }
     }
 }
@@ -96,7 +96,7 @@ struct InstallerPlanBuilder: Sendable {
             )
         }
 
-        let plan: InstallerPlan = InstallerPlan(
+        let plan: InstallerPlan = .init(
             diskIdentifier: diskIdentifier,
             diskSizeBytes: diskSizeBytes,
             partitions: partitions,
@@ -117,11 +117,11 @@ struct InstallerPlanBuilder: Sendable {
     private func defaultFileSystem(for platform: InstallerPlatform) -> String {
         switch platform {
         case .macOS, .recovery:
-            return "HFS+"
+            "HFS+"
         case .windows:
-            return "exFAT/NTFS"
+            "exFAT/NTFS"
         case .linux, .utility, .custom:
-            return "FAT32/exFAT"
+            "FAT32/exFAT"
         }
     }
 }
