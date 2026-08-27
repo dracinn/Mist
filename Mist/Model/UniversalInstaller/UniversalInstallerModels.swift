@@ -1,7 +1,7 @@
 //  UniversalInstallerModels.swift
 //  Mist
 //
-//  Initial architecture scaffold for multi-installer and OpenCore support.
+//  Initial architecture scaffold for multi-macOS installer and OpenCore support.
 //
 
 import Foundation
@@ -9,25 +9,21 @@ import Foundation
 enum BootStrategy: String, Codable, CaseIterable, Sendable {
     case nativeMacIntel
     case openCore
-    case genericUEFI
     case appleSilicon
-    case asahi
 }
 
-enum InstallerPlatform: String, Codable, CaseIterable, Sendable {
-    case macOS
-    case linux
-    case windows
+enum MacOSInstallerKind: String, Codable, CaseIterable, Sendable {
+    case fullInstaller
     case recovery
-    case utility
-    case custom
 }
 
 // swiftlint:disable:next file_types_order
 struct InstallerTarget: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     var name: String
-    var platform: InstallerPlatform
+    var version: String
+    var build: String
+    var kind: MacOSInstallerKind
     var bootStrategy: BootStrategy
     var source: URL?
     var requiredBytes: UInt64
@@ -35,7 +31,9 @@ struct InstallerTarget: Identifiable, Codable, Hashable, Sendable {
 
     init(
         name: String,
-        platform: InstallerPlatform,
+        version: String,
+        build: String,
+        kind: MacOSInstallerKind,
         bootStrategy: BootStrategy,
         requiredBytes: UInt64,
         minimumPartitionBytes: UInt64,
@@ -44,7 +42,9 @@ struct InstallerTarget: Identifiable, Codable, Hashable, Sendable {
     ) {
         self.id = id
         self.name = name
-        self.platform = platform
+        self.version = version
+        self.build = build
+        self.kind = kind
         self.bootStrategy = bootStrategy
         self.source = source
         self.requiredBytes = requiredBytes
@@ -82,10 +82,14 @@ struct InstallerPlan: Codable, Hashable, Sendable {
     var reserveBytes: UInt64
 
     var allocatedBytes: UInt64 {
-        partitions.reduce(0) { $0 + $1.sizeBytes }
+        partitions.reduce(0) { partialResult, partition in
+            let (result, overflow): (UInt64, Bool) = partialResult.addingReportingOverflow(partition.sizeBytes)
+            return overflow ? .max : result
+        }
     }
 
     var fitsOnDisk: Bool {
-        allocatedBytes + reserveBytes <= diskSizeBytes
+        let (requiredBytes, overflow): (UInt64, Bool) = allocatedBytes.addingReportingOverflow(reserveBytes)
+        return !overflow && requiredBytes <= diskSizeBytes
     }
 }
