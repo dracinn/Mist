@@ -158,6 +158,8 @@
 		EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */; };
 		EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */; };
 		EE0000010000000000000004 /* PhysicalDiskDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */; };
+		EE0000010000000000000005 /* DiskutilEFIPartitionDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */; };
+		EE0000010000000000000006 /* EFIPartitionDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000005 /* EFIPartitionDiscoveryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -334,6 +336,8 @@
 		FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerPreviewView.swift; sourceTree = "<group>"; };
 		FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskutilPhysicalDiskDiscovery.swift; sourceTree = "<group>"; };
 		FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicalDiskDiscoveryTests.swift; sourceTree = "<group>"; };
+		FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskutilEFIPartitionDiscovery.swift; sourceTree = "<group>"; };
+		FF0000010000000000000005 /* EFIPartitionDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EFIPartitionDiscoveryTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -559,6 +563,7 @@
 		39CB5E5229418A2900CFDBB8 /* MistTests */ = {
 			isa = PBXGroup;
 			children = (
+				FF0000010000000000000005 /* EFIPartitionDiscoveryTests.swift */,
 				FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */,
 				BB0000010000000000000004 /* UniversalInstallerTests.swift */,
 				39CB5E5329418A2900CFDBB8 /* MistTests.swift */,
@@ -646,6 +651,7 @@
 		CC0000010000000000000002 /* UniversalInstaller */ = {
 			isa = PBXGroup;
 			children = (
+				FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */,
 				FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */,
 				BB0000010000000000000003 /* UniversalInstallerServices.swift */,
 			);
@@ -876,6 +882,7 @@
 				AA0000010000000000000002 /* HardwareCompatibility.swift in Sources */,
 				AA0000010000000000000003 /* UniversalInstallerServices.swift in Sources */,
 				EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */,
+				EE0000010000000000000005 /* DiskutilEFIPartitionDiscovery.swift in Sources */,
 				EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */,
 				39FF05F02859848500A86670 /* SettingsView.swift in Sources */,
 				39CF562A2861E1CB006FB5D2 /* DirectoryRemover.swift in Sources */,
@@ -1010,6 +1017,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EE0000010000000000000006 /* EFIPartitionDiscoveryTests.swift in Sources */,
 				EE0000010000000000000004 /* PhysicalDiskDiscoveryTests.swift in Sources */,
 				AA0000010000000000000004 /* UniversalInstallerTests.swift in Sources */,
 				39CB5E5429418A2900CFDBB8 /* MistTests.swift in Sources */,

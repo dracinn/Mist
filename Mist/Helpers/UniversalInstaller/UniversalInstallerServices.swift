@@ -25,7 +25,6 @@ protocol CompatibilityResolving: Sendable {
 }
 
 protocol OpenCoreManaging: Sendable {
-    func discoverEFIs() async throws -> [URL]
     func backupEFI(at url: URL, to destination: URL) async throws
     func validateEFI(at url: URL) async throws
     func generateEFI(

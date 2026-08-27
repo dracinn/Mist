@@ -38,6 +38,8 @@ The preview may read external physical-disk metadata through `diskutil` plist ou
 
 Each selected macOS catalog entry carries its own boot strategy, allowing a single preview to model Native Intel, OpenCore, and Apple Silicon installer targets independently.
 
+Existing EFI partitions are discovered through read-only `diskutil list` and `diskutil info` plist queries. Discovery is scoped to a selected whole disk and returns partition identity, size, and existing mount state without mounting, unmounting, or modifying the EFI partition.
+
 ## Current scope
 
 - `nativeMacIntel`
@@ -66,7 +68,7 @@ Linux, Windows, generic UEFI, Asahi, shared data partitions, and arbitrary custo
 - Integrate the new model files into the Xcode target.
 - Add unit tests for plan validation and sizing.
 - Add a read-only hardware report importer.
-- Add a read-only EFI detector/mounter abstraction.
+- Add an explicit, privileged EFI mounting abstraction after a dedicated safety review.
 - Add a macOS provider wrapping Mist's existing installer creation path.
 - Add OpenCore configuration generation as a separate service.
 - Add a second, explicit safety review before any future disk-writing implementation is designed.

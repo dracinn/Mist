@@ -39,6 +39,18 @@ struct PhysicalDisk: Identifiable, Hashable, Sendable {
     var busProtocol: String
 }
 
+struct EFIPartition: Identifiable, Hashable, Sendable {
+    var id: String {
+        identifier
+    }
+
+    var identifier: String
+    var parentDiskIdentifier: String
+    var name: String
+    var sizeBytes: UInt64
+    var mountPoint: URL?
+}
+
 // swiftlint:disable:next file_types_order
 struct InstallerTarget: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
