@@ -411,6 +411,12 @@ private extension ContentView {
     }
 
     /// A checked label used in the filter menu.
+    ///
+    /// - Parameters:
+    ///   - title:    The filter option title.
+    ///   - selected: Whether the option is selected.
+    ///
+    /// - Returns: A filter label with its selection indicator.
     func filterLabel(_ title: String, selected: Bool) -> some View {
         Label(title, systemImage: selected ? "checkmark" : "circle")
     }
@@ -507,6 +513,10 @@ private extension ContentView {
     }
 
     /// A selectable macOS installer row.
+    ///
+    /// - Parameter installer: The installer represented by the row.
+    ///
+    /// - Returns: A selectable catalog row.
     func installerCatalogRow(_ installer: Installer) -> some View {
         ListRowInstaller(
             installer: installer,
@@ -524,6 +534,10 @@ private extension ContentView {
 
     // swiftlint:disable function_body_length
     /// A Windows, Linux, or Asahi catalog row with safe external actions.
+    ///
+    /// - Parameter resource: The external operating-system resource.
+    ///
+    /// - Returns: A catalog row with official download, guide and copy actions.
     func catalogResourceRow(_ resource: OperatingSystemResource) -> some View {
         // swiftlint:disable:next closure_body_length
         HStack(spacing: 12) {
@@ -583,6 +597,12 @@ private extension ContentView {
     // swiftlint:enable function_body_length
 
     /// Compact OS-specific artwork for an external catalog resource.
+    ///
+    /// - Parameters:
+    ///   - resource: The operating-system resource.
+    ///   - length:   The square icon length.
+    ///
+    /// - Returns: Bundled brand artwork in a catalog icon container.
     func resourceIcon(_ resource: OperatingSystemResource, length: CGFloat = 38) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 9, style: .continuous)
@@ -696,6 +716,10 @@ private extension ContentView {
     }
 
     /// Inspector contents for an external operating-system resource.
+    ///
+    /// - Parameter resource: The selected operating-system resource.
+    ///
+    /// - Returns: A detailed resource summary.
     func resourceInspector(_ resource: OperatingSystemResource) -> some View {
         // swiftlint:disable:next closure_body_length
         ScrollView {
@@ -735,6 +759,13 @@ private extension ContentView {
     }
 
     /// Title block used by both catalog inspectors.
+    ///
+    /// - Parameters:
+    ///   - imageName: The catalog artwork name.
+    ///   - name:      The displayed release name.
+    ///   - build:     The displayed build identifier.
+    ///
+    /// - Returns: A catalog inspector title block.
     func catalogInspectorTitle(imageName: String, name: String, build: String) -> some View {
         HStack(spacing: 12) {
             ScaledImage(name: imageName, length: 52)
@@ -749,6 +780,13 @@ private extension ContentView {
     }
 
     /// Metadata shown beneath an inspector title.
+    ///
+    /// - Parameters:
+    ///   - type: The catalog item type.
+    ///   - size: The formatted download size.
+    ///   - date: The formatted release date.
+    ///
+    /// - Returns: A metadata summary view.
     func inspectorMetadata(type: String, size: String, date: String) -> some View {
         VStack(alignment: .leading, spacing: 7) {
             Text(type)
@@ -760,6 +798,12 @@ private extension ContentView {
     }
 
     /// Compatibility labels for a selected catalog item.
+    ///
+    /// - Parameters:
+    ///   - supportsAppleSilicon: Whether Apple Silicon is supported.
+    ///   - supportsIntel:        Whether Intel Macs are supported.
+    ///
+    /// - Returns: The catalog compatibility summary.
     func compatibilitySection(supportsAppleSilicon: Bool, supportsIntel: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Compatibility")
@@ -831,6 +875,10 @@ private extension ContentView {
     }
 
     /// Whether an external resource matches the current catalog search.
+    ///
+    /// - Parameter resource: The resource to evaluate.
+    ///
+    /// - Returns: `true` when the resource matches the search.
     func resourceMatchesSearch(_ resource: OperatingSystemResource) -> Bool {
         searchString.isEmpty
             || resource.name.localizedCaseInsensitiveContains(searchString)
@@ -838,6 +886,10 @@ private extension ContentView {
     }
 
     /// Whether an external resource matches the architecture filter.
+    ///
+    /// - Parameter resource: The resource to evaluate.
+    ///
+    /// - Returns: `true` when the resource matches the architecture filter.
     func resourceMatchesArchitecture(_ resource: OperatingSystemResource) -> Bool {
         switch architectureFilter {
         case .all:
@@ -850,6 +902,10 @@ private extension ContentView {
     }
 
     /// Whether an external resource matches the operating-system filter.
+    ///
+    /// - Parameter resource: The resource to evaluate.
+    ///
+    /// - Returns: `true` when the resource matches the operating-system filter.
     func resourceMatchesOS(_ resource: OperatingSystemResource) -> Bool {
         switch osFilter {
         case .all:
@@ -871,6 +927,10 @@ private extension ContentView {
     }
 
     /// Human-readable category for an external operating-system resource.
+    ///
+    /// - Parameter resource: The resource to categorize.
+    ///
+    /// - Returns: The resource's operating-system category.
     func resourceKind(_ resource: OperatingSystemResource) -> String {
         if resource == OperatingSystemResource.fedoraAsahi {
             return "Asahi Linux"
@@ -879,6 +939,8 @@ private extension ContentView {
     }
 
     /// Opens a validated external resource URL.
+    ///
+    /// - Parameter value: The HTTPS URL string to open.
     func open(_ value: String) {
         guard let url = URL(string: value), url.scheme == "https" else {
             return
@@ -887,6 +949,8 @@ private extension ContentView {
     }
 
     /// Copies an official resource URL.
+    ///
+    /// - Parameter value: The URL string to copy.
     func copy(_ value: String) {
         NSPasteboard.general.declareTypes([.string], owner: nil)
         NSPasteboard.general.setString(value, forType: .string)

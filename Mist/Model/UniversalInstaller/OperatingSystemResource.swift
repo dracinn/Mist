@@ -173,6 +173,10 @@ extension OperatingSystemResource {
 
     // swiftlint:disable cyclomatic_complexity function_body_length
     /// Detailed catalog description for an Intel Linux distribution.
+    ///
+    /// - Parameter name: The distribution name.
+    ///
+    /// - Returns: A detailed catalog description.
     private static func linuxSummary(_ name: String) -> String {
         let detail: String = switch name {
         case "Ubuntu":
