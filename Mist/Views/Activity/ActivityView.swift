@@ -18,15 +18,15 @@ enum ActivityWindowPresenter {
     /// Opens a non-blocking activity window for the prepared task queue.
     ///
     /// - Parameters:
-    ///   - downloadType: The kind of Apple content being processed.
-    ///   - imageName: The system image displayed for the operation.
-    ///   - name: The release name displayed in the activity header.
-    ///   - version: The release version displayed in the activity header.
-    ///   - build: The release build displayed in the activity header.
-    ///   - beta: Whether the selected release is a beta.
+    ///   - downloadType:   The kind of Apple content being processed.
+    ///   - imageName:      The system image displayed for the operation.
+    ///   - name:           The release name displayed in the activity header.
+    ///   - version:        The release version displayed in the activity header.
+    ///   - build:          The release build displayed in the activity header.
+    ///   - beta:           Whether the selected release is a beta.
     ///   - destinationURL: The operation's output location, when available.
-    ///   - taskManager: The shared manager containing the prepared task queue.
-    ///   - onClose: Work to perform after the activity window closes.
+    ///   - taskManager:    The shared manager containing the prepared task queue.
+    ///   - onClose:        Work to perform after the activity window closes.
     static func present(
         downloadType: DownloadType,
         imageName: String,
