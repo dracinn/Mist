@@ -9,6 +9,7 @@ struct UniversalInstallerPreviewView: View {
     @Environment(\.dismiss)
     private var dismiss: DismissAction
     var installers: [Installer]
+    var embedded: Bool = false
     @State private var selectedInstallerIDs: Set<String> = []
     @State private var bootStrategies: [String: BootStrategy] = [:]
     @State private var diskSizeGiB: Int = 64
@@ -75,8 +76,11 @@ struct UniversalInstallerPreviewView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            Divider()
+            if !embedded {
+                header
+                Divider()
+            }
+
             HSplitView {
                 installerSelection
                 planConfiguration
@@ -84,7 +88,12 @@ struct UniversalInstallerPreviewView: View {
             Divider()
             safetyFooter
         }
-        .frame(width: 800, height: 660)
+        .frame(
+            minWidth: embedded ? 680 : 800,
+            idealWidth: 800,
+            minHeight: embedded ? 540 : 660,
+            idealHeight: 660
+        )
         .task {
             await refreshPhysicalDisks()
         }
@@ -110,8 +119,14 @@ struct UniversalInstallerPreviewView: View {
 
     private var installerSelection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("macOS Installers")
-                .font(.headline)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("macOS Installers")
+                    .font(.headline)
+                Text("For genuine Intel and Apple Silicon Macs only")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
             List(installers) { installer in
                 VStack(alignment: .leading, spacing: 6) {
                     Toggle(isOn: selectionBinding(for: installer)) {
@@ -138,7 +153,7 @@ struct UniversalInstallerPreviewView: View {
             }
         }
         .padding()
-        .frame(minWidth: 340)
+        .frame(minWidth: 320)
     }
 
     private var planConfiguration: some View {
@@ -157,7 +172,7 @@ struct UniversalInstallerPreviewView: View {
             Spacer()
         }
         .padding()
-        .frame(minWidth: 360)
+        .frame(minWidth: 340)
     }
 
     private var diskSelection: some View {
@@ -242,23 +257,17 @@ struct UniversalInstallerPreviewView: View {
         .help("Refresh external physical disks")
     }
 
-    init(installers: [Installer]) {
+    init(installers: [Installer], embedded: Bool = false) {
         self.installers = installers
+        self.embedded = embedded
         defaultBootStrategy = Hardware.architecture == .appleSilicon ? .appleSilicon : .nativeMacIntel
     }
 }
 
 private extension UniversalInstallerPreviewView {
-    /// Binds an installer row to the current multi-selection.
-    ///
-    /// - Parameter installer: The catalog installer represented by the row.
-    ///
-    /// - Returns: A binding that adds or removes the installer selection.
     func selectionBinding(for installer: Installer) -> Binding<Bool> {
         Binding(
-            get: {
-                selectedInstallerIDs.contains(installer.id)
-            },
+            get: { selectedInstallerIDs.contains(installer.id) },
             set: { selected in
                 if selected {
                     selectedInstallerIDs.insert(installer.id)
@@ -271,29 +280,13 @@ private extension UniversalInstallerPreviewView {
         )
     }
 
-    /// Binds an installer row to its independently selected boot strategy.
-    ///
-    /// - Parameter installer: The selected catalog installer.
-    ///
-    /// - Returns: A binding to the installer's boot strategy.
     func bootStrategyBinding(for installer: Installer) -> Binding<BootStrategy> {
         Binding(
-            get: {
-                bootStrategies[installer.id] ?? defaultBootStrategy
-            },
-            set: { strategy in
-                bootStrategies[installer.id] = strategy
-            }
+            get: { bootStrategies[installer.id] ?? defaultBootStrategy },
+            set: { strategy in bootStrategies[installer.id] = strategy }
         )
     }
 
-    /// Displays a labeled byte count in the plan summary.
-    ///
-    /// - Parameters:
-    ///   - label: The summary row label.
-    ///   - bytes: The byte count to format.
-    ///
-    /// - Returns: A summary row containing the label and formatted byte count.
     func sizeRow(_ label: String, bytes: UInt64) -> some View {
         HStack {
             Text(label)
@@ -303,13 +296,10 @@ private extension UniversalInstallerPreviewView {
         }
     }
 
-    /// Refreshes the read-only list of eligible external physical disks.
     @MainActor
     func refreshPhysicalDisks() async {
         isDiscoveringDisks = true
-        defer {
-            isDiscoveringDisks = false
-        }
+        defer { isDiscoveringDisks = false }
 
         do {
             let disks: [PhysicalDisk] = try await DiskutilPhysicalDiskDiscovery().externalPhysicalDisks()
