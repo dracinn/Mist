@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     private enum WorkspaceSection: String, CaseIterable, Identifiable {
         case catalog
+        case installerPlanner
         case multiOS
 
         var id: String { rawValue }
@@ -18,6 +19,8 @@ struct ContentView: View {
             switch self {
             case .catalog:
                 "Apple Catalog"
+            case .installerPlanner:
+                "Installer Planner"
             case .multiOS:
                 "Multi-OS Setup"
             }
@@ -26,9 +29,11 @@ struct ContentView: View {
         var subtitle: String {
             switch self {
             case .catalog:
-                "Firmwares and installers"
+                "macOS firmware and installers"
+            case .installerPlanner:
+                "Intel & Apple Silicon Macs"
             case .multiOS:
-                "macOS, OCLP, Windows and Linux"
+                "Windows, Linux, OCLP & Asahi"
             }
         }
 
@@ -36,8 +41,10 @@ struct ContentView: View {
             switch self {
             case .catalog:
                 "square.stack.3d.down.right"
+            case .installerPlanner:
+                "externaldrive.badge.plus"
             case .multiOS:
-                "externaldrive.connected.to.line.below"
+                "macwindow.on.rectangle"
             }
         }
     }
@@ -176,6 +183,10 @@ struct ContentView: View {
 
             Spacer()
 
+            Label("Mac hardware only", systemImage: "desktopcomputer")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
             if tasksInProgress {
                 Label("Task in progress", systemImage: "arrow.down.circle")
                     .font(.caption)
@@ -188,30 +199,20 @@ struct ContentView: View {
 
     private var workspaceSidebar: some View {
         List {
-            Section("Workspace") {
-                ForEach(WorkspaceSection.allCases) { section in
-                    Button {
-                        workspaceSection = section
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: section.systemImage)
-                                .frame(width: 18)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(section.title)
-                                Text(section.subtitle)
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            if workspaceSection == section {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.accentColor)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
+            Section("Library") {
+                workspaceButton(.catalog)
+            }
+
+            Section("Create") {
+                workspaceButton(.installerPlanner)
+                workspaceButton(.multiOS)
+            }
+
+            Section("Supported Hardware") {
+                Label("Intel Macs", systemImage: "cpu")
+                    .font(.caption)
+                Label("Apple Silicon Macs", systemImage: "desktopcomputer")
+                    .font(.caption)
             }
 
             Section("Catalog Status") {
@@ -225,11 +226,37 @@ struct ContentView: View {
         .frame(minWidth: 220, idealWidth: 235, maxWidth: 270)
     }
 
+    private func workspaceButton(_ section: WorkspaceSection) -> some View {
+        Button {
+            workspaceSection = section
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: section.systemImage)
+                    .frame(width: 18)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(section.title)
+                    Text(section.subtitle)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                if workspaceSection == section {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.accentColor)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
     @ViewBuilder
     private var workspaceDetail: some View {
         switch workspaceSection {
         case .catalog:
             catalogView
+        case .installerPlanner:
+            UniversalInstallerPreviewView(installers: filteredInstallers, embedded: true)
         case .multiOS:
             MultiOSSetupView(installers: filteredInstallers, embedded: true)
         }
