@@ -13,12 +13,15 @@ final class SparkleUpdater: ObservableObject {
     @Published var canCheckForUpdates: Bool = false
 
     init() {
-        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
         updaterController.updater.publisher(for: \.canCheckForUpdates)
             .assign(to: &$canCheckForUpdates)
     }
 
     func checkForUpdates() {
+        guard canCheckForUpdates else {
+            return
+        }
         updaterController.checkForUpdates(nil)
     }
 }

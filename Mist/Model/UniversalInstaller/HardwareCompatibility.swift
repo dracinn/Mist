@@ -7,6 +7,15 @@ import Foundation
 enum AppleHardwarePlatform: String, Codable, CaseIterable, Sendable {
     case intelMac
     case appleSiliconMac
+
+    var description: String {
+        switch self {
+        case .intelMac:
+            "Intel Mac"
+        case .appleSiliconMac:
+            "Apple silicon Mac"
+        }
+    }
 }
 
 enum HardwareCategory: String, Codable, CaseIterable, Sendable {

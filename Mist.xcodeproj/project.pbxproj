@@ -158,6 +158,7 @@
 		AB0000010000000000000001 /* JSONHardwareProfileImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000010000000000000002 /* JSONHardwareProfileImporter.swift */; };
 		AB0000010000000000000003 /* HardwareProfileImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000010000000000000004 /* HardwareProfileImporterTests.swift */; };
 		EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */; };
+		EE0000010000000000000007 /* HardwareProfileReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000007 /* HardwareProfileReviewView.swift */; };
 		EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */; };
 		EE0000010000000000000004 /* PhysicalDiskDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */; };
 		EE0000010000000000000005 /* DiskutilEFIPartitionDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */; };
@@ -338,6 +339,7 @@
 		AB0000010000000000000002 /* JSONHardwareProfileImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONHardwareProfileImporter.swift; sourceTree = "<group>"; };
 		AB0000010000000000000004 /* HardwareProfileImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareProfileImporterTests.swift; sourceTree = "<group>"; };
 		FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerPreviewView.swift; sourceTree = "<group>"; };
+		FF0000010000000000000007 /* HardwareProfileReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareProfileReviewView.swift; sourceTree = "<group>"; };
 		FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskutilPhysicalDiskDiscovery.swift; sourceTree = "<group>"; };
 		FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicalDiskDiscoveryTests.swift; sourceTree = "<group>"; };
 		FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskutilEFIPartitionDiscovery.swift; sourceTree = "<group>"; };
@@ -523,6 +525,7 @@
 		EE0000010000000000000002 /* UniversalInstaller */ = {
 			isa = PBXGroup;
 			children = (
+				FF0000010000000000000007 /* HardwareProfileReviewView.swift */,
 				FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */,
 			);
 			path = UniversalInstaller;
@@ -889,6 +892,7 @@
 				AA0000010000000000000003 /* UniversalInstallerServices.swift in Sources */,
 				AB0000010000000000000001 /* JSONHardwareProfileImporter.swift in Sources */,
 				EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */,
+				EE0000010000000000000007 /* HardwareProfileReviewView.swift in Sources */,
 				EE0000010000000000000005 /* DiskutilEFIPartitionDiscovery.swift in Sources */,
 				EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */,
 				39FF05F02859848500A86670 /* SettingsView.swift in Sources */,
@@ -1198,7 +1202,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0.40;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7K3HVCLV7Z;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1206,7 +1210,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Mist/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Mist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Mist Universal";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1214,7 +1218,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.40;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ninxsoft.mist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1232,7 +1236,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0.40;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7K3HVCLV7Z;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1240,7 +1244,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Mist/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Mist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Mist Universal";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1248,7 +1252,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.40;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ninxsoft.mist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1309,7 +1313,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 0.10;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7K3HVCLV7Z;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1318,7 +1322,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Mist;
 				LAUNCHDPLIST_FILE = "$(SRCROOT)/MistHelperTool/launchd.plist";
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.10;
+				MARKETING_VERSION = 0.1;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,
@@ -1345,7 +1349,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 0.10;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7K3HVCLV7Z;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1354,7 +1358,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Mist;
 				LAUNCHDPLIST_FILE = "$(SRCROOT)/MistHelperTool/launchd.plist";
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.10;
+				MARKETING_VERSION = 0.1;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,

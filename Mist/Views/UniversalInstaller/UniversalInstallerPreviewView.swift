@@ -16,6 +16,9 @@ struct UniversalInstallerPreviewView: View {
     @State private var selectedDiskIdentifier: String = ""
     @State private var diskDiscoveryError: String?
     @State private var isDiscoveringDisks: Bool = false
+    @State private var hardwareProfile: HardwareProfile?
+    @State private var hardwareReportName: String?
+    @State private var hardwareImportError: String?
     private let diskSizesGiB: [Int] = [32, 64, 128, 256, 512]
     private let defaultBootStrategy: BootStrategy
 
@@ -49,6 +52,15 @@ struct UniversalInstallerPreviewView: View {
             return (nil, "Select at least one macOS installer.")
         }
 
+        if selections.contains(where: { $0.bootStrategy == .openCoreLegacyPatcher }) {
+            guard let hardwareProfile else {
+                return (nil, "Import an Intel Mac hardware report before selecting OCLP.")
+            }
+            guard hardwareProfile.platform == .intelMac else {
+                return (nil, "OCLP is available only for supported Intel Macs, not Apple silicon.")
+            }
+        }
+
         do {
             let preview: InstallerPlanPreview = try MacOSInstallerPreviewBuilder().preview(
                 selections: selections,
@@ -72,7 +84,7 @@ struct UniversalInstallerPreviewView: View {
             Divider()
             safetyFooter
         }
-        .frame(width: 760, height: 560)
+        .frame(width: 800, height: 660)
         .task {
             await refreshPhysicalDisks()
         }
@@ -131,6 +143,13 @@ struct UniversalInstallerPreviewView: View {
 
     private var planConfiguration: some View {
         VStack(alignment: .leading, spacing: 16) {
+            HardwareProfileReviewView(
+                profile: $hardwareProfile,
+                reportName: $hardwareReportName,
+                importError: $hardwareImportError
+            )
+
+            Divider()
             diskSelection
 
             Divider()

@@ -26,9 +26,9 @@ struct SettingsAboutView: View {
             HStack {
                 ScaledImage(length: length)
                 VStack(alignment: .leading) {
-                    Text("Mist")
+                    Text("Mist Universal")
                         .font(.largeTitle)
-                    Text("The macOS Installer Super Tool")
+                    Text("Apple Mac Multi-Installer")
                         .font(.title3)
                     HStack(spacing: spacing) {
                         Text("Version: \(version)")
@@ -40,7 +40,7 @@ struct SettingsAboutView: View {
             }
             PaddedDivider()
             HStack {
-                Text("Made with 🩸,💧, and whole lot of 😭 by [Ninxsoft](https://github.com/ninxsoft)")
+                Text("Based on [Mist](https://github.com/ninxsoft/Mist) by Ninxsoft · Universal installer development by [dracinn](https://github.com/dracinn)")
                 Spacer()
                 Button("Visit Homepage") {
                     visitHomepage()
