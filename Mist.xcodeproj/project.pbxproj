@@ -155,6 +155,8 @@
 		AA0000010000000000000002 /* HardwareCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000010000000000000002 /* HardwareCompatibility.swift */; };
 		AA0000010000000000000003 /* UniversalInstallerServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000010000000000000003 /* UniversalInstallerServices.swift */; };
 		AA0000010000000000000004 /* UniversalInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000010000000000000004 /* UniversalInstallerTests.swift */; };
+		AB0000010000000000000001 /* JSONHardwareProfileImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000010000000000000002 /* JSONHardwareProfileImporter.swift */; };
+		AB0000010000000000000003 /* HardwareProfileImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000010000000000000004 /* HardwareProfileImporterTests.swift */; };
 		EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */; };
 		EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */; };
 		EE0000010000000000000004 /* PhysicalDiskDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */; };
@@ -333,6 +335,8 @@
 		BB0000010000000000000002 /* HardwareCompatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareCompatibility.swift; sourceTree = "<group>"; };
 		BB0000010000000000000003 /* UniversalInstallerServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerServices.swift; sourceTree = "<group>"; };
 		BB0000010000000000000004 /* UniversalInstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerTests.swift; sourceTree = "<group>"; };
+		AB0000010000000000000002 /* JSONHardwareProfileImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONHardwareProfileImporter.swift; sourceTree = "<group>"; };
+		AB0000010000000000000004 /* HardwareProfileImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareProfileImporterTests.swift; sourceTree = "<group>"; };
 		FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerPreviewView.swift; sourceTree = "<group>"; };
 		FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskutilPhysicalDiskDiscovery.swift; sourceTree = "<group>"; };
 		FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicalDiskDiscoveryTests.swift; sourceTree = "<group>"; };
@@ -564,6 +568,7 @@
 			isa = PBXGroup;
 			children = (
 				FF0000010000000000000005 /* EFIPartitionDiscoveryTests.swift */,
+				AB0000010000000000000004 /* HardwareProfileImporterTests.swift */,
 				FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */,
 				BB0000010000000000000004 /* UniversalInstallerTests.swift */,
 				39CB5E5329418A2900CFDBB8 /* MistTests.swift */,
@@ -653,6 +658,7 @@
 			children = (
 				FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */,
 				FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */,
+				AB0000010000000000000002 /* JSONHardwareProfileImporter.swift */,
 				BB0000010000000000000003 /* UniversalInstallerServices.swift */,
 			);
 			path = UniversalInstaller;
@@ -881,6 +887,7 @@
 				AA0000010000000000000001 /* UniversalInstallerModels.swift in Sources */,
 				AA0000010000000000000002 /* HardwareCompatibility.swift in Sources */,
 				AA0000010000000000000003 /* UniversalInstallerServices.swift in Sources */,
+				AB0000010000000000000001 /* JSONHardwareProfileImporter.swift in Sources */,
 				EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */,
 				EE0000010000000000000005 /* DiskutilEFIPartitionDiscovery.swift in Sources */,
 				EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */,
@@ -1018,6 +1025,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE0000010000000000000006 /* EFIPartitionDiscoveryTests.swift in Sources */,
+				AB0000010000000000000003 /* HardwareProfileImporterTests.swift in Sources */,
 				EE0000010000000000000004 /* PhysicalDiskDiscoveryTests.swift in Sources */,
 				AA0000010000000000000004 /* UniversalInstallerTests.swift in Sources */,
 				39CB5E5429418A2900CFDBB8 /* MistTests.swift in Sources */,

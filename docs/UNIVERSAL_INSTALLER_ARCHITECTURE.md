@@ -40,6 +40,26 @@ Each selected macOS catalog entry carries its own boot strategy, allowing a sing
 
 Existing EFI partitions are discovered through read-only `diskutil list` and `diskutil info` plist queries. Discovery is scoped to a selected whole disk and returns partition identity, size, and existing mount state without mounting, unmounting, or modifying the EFI partition.
 
+Hardware profiles can be imported from a local, versioned JSON report. Import is read-only, limited to regular files of at most 1 MiB, rejects symbolic links, and validates schema version 1 before producing a normalized `HardwareProfile`. Local hardware probing remains intentionally unavailable.
+
+```json
+{
+  "schemaVersion": 1,
+  "modelName": "Example Mac",
+  "boardName": "ExampleBoard",
+  "devices": [
+    {
+      "category": "cpu",
+      "name": "Example CPU",
+      "vendorID": "8086",
+      "deviceID": "1234",
+      "subsystemID": "5678"
+    }
+  ],
+  "acpiTableNames": ["DSDT", "SSDT-EC"]
+}
+```
+
 ## Current scope
 
 - `nativeMacIntel`
@@ -67,7 +87,7 @@ Linux, Windows, generic UEFI, Asahi, shared data partitions, and arbitrary custo
 
 - Integrate the new model files into the Xcode target.
 - Add unit tests for plan validation and sizing.
-- Add a read-only hardware report importer.
+- Add a read-only UI for selecting and reviewing an imported hardware report.
 - Add an explicit, privileged EFI mounting abstraction after a dedicated safety review.
 - Add a macOS provider wrapping Mist's existing installer creation path.
 - Add OpenCore configuration generation as a separate service.
