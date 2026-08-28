@@ -41,43 +41,9 @@ struct LogView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Table(filteredLogEntries, selection: $selectedLogEntries) {
-                TableColumn("Timestamp") { logEntry in
-                    Text(logEntry.timestamp.ISO8601Format())
-                }
-                .width(timeColumnWidth)
-                TableColumn("Level") { logEntry in
-                    HStack {
-                        Circle()
-                            .fill(logEntry.level.color)
-                            .frame(width: levelCircleRadius, height: levelCircleRadius)
-                        Text(logEntry.level.description)
-                        Spacer()
-                    }
-                }
-                .width(levelColumnWidth)
-                TableColumn("Message") { logEntry in
-                    Text(logEntry.message)
-                        .help(logEntry.message)
-                }
-            }
-            .textSelection(.enabled)
+            logTable
             Divider()
-            HStack {
-                Picker("Detail Level", selection: $detailLevel) {
-                    ForEach(LogLevel.allCases.reversed()) { logLevel in
-                        Text(logLevel.detailLevelDescription)
-                            .tag(logLevel)
-                    }
-                }
-                .frame(maxWidth: 220)
-
-                Spacer()
-                Button("Export Log...") {
-                    export()
-                }
-            }
-            .padding()
+            footer
         }
         .frame(
             minWidth: embedded ? 620 : width,
@@ -88,6 +54,48 @@ struct LogView: View {
             maxHeight: embedded ? .infinity : height
         )
         .searchable(text: $searchString)
+    }
+
+    private var logTable: some View {
+        Table(filteredLogEntries, selection: $selectedLogEntries) {
+            TableColumn("Timestamp") { logEntry in
+                Text(logEntry.timestamp.ISO8601Format())
+            }
+            .width(timeColumnWidth)
+            TableColumn("Level") { logEntry in
+                HStack {
+                    Circle()
+                        .fill(logEntry.level.color)
+                        .frame(width: levelCircleRadius, height: levelCircleRadius)
+                    Text(logEntry.level.description)
+                    Spacer()
+                }
+            }
+            .width(levelColumnWidth)
+            TableColumn("Message") { logEntry in
+                Text(logEntry.message)
+                    .help(logEntry.message)
+            }
+        }
+        .textSelection(.enabled)
+    }
+
+    private var footer: some View {
+        HStack {
+            Picker("Detail Level", selection: $detailLevel) {
+                ForEach(LogLevel.allCases.reversed()) { logLevel in
+                    Text(logLevel.detailLevelDescription)
+                        .tag(logLevel)
+                }
+            }
+            .frame(maxWidth: 220)
+
+            Spacer()
+            Button("Export Log...") {
+                export()
+            }
+        }
+        .padding()
     }
 
     private func export() {

@@ -265,6 +265,11 @@ struct UniversalInstallerPreviewView: View {
 }
 
 private extension UniversalInstallerPreviewView {
+    /// Returns a selection binding for an installer row.
+    ///
+    /// - Parameter installer: The catalog installer represented by the row.
+    ///
+    /// - Returns: A binding to the installer's selected state.
     func selectionBinding(for installer: Installer) -> Binding<Bool> {
         Binding(
             get: { selectedInstallerIDs.contains(installer.id) },
@@ -280,6 +285,11 @@ private extension UniversalInstallerPreviewView {
         )
     }
 
+    /// Returns the selected boot-strategy binding for an installer.
+    ///
+    /// - Parameter installer: The catalog installer whose strategy is selected.
+    ///
+    /// - Returns: A binding to the installer's boot strategy.
     func bootStrategyBinding(for installer: Installer) -> Binding<BootStrategy> {
         Binding(
             get: { bootStrategies[installer.id] ?? defaultBootStrategy },
@@ -287,6 +297,13 @@ private extension UniversalInstallerPreviewView {
         )
     }
 
+    /// Creates a labeled byte-count row.
+    ///
+    /// - Parameters:
+    ///   - label: The row label.
+    ///   - bytes: The byte count displayed by the row.
+    ///
+    /// - Returns: A labeled byte-count view.
     func sizeRow(_ label: String, bytes: UInt64) -> some View {
         HStack {
             Text(label)
@@ -296,6 +313,7 @@ private extension UniversalInstallerPreviewView {
         }
     }
 
+    /// Refreshes the eligible external physical-disk list.
     @MainActor
     func refreshPhysicalDisks() async {
         isDiscoveringDisks = true

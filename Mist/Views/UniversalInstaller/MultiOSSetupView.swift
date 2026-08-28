@@ -246,8 +246,17 @@ struct MultiOSSetupView: View {
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
 
-    private func sectionHeader(_ title: String, subtitle: String) -> some View {
+private extension MultiOSSetupView {
+    /// Creates a section heading with supporting text.
+    ///
+    /// - Parameters:
+    ///   - title:    The section title.
+    ///   - subtitle: Supporting section text.
+    ///
+    /// - Returns: A section-heading view.
+    func sectionHeader(_ title: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.title2)
@@ -257,7 +266,14 @@ struct MultiOSSetupView: View {
         }
     }
 
-    private func operatingSystemCard(
+    /// Creates an operating-system card with custom actions.
+    ///
+    /// - Parameters:
+    ///   - option:  The operating-system resource to display.
+    ///   - actions: The actions displayed in the card.
+    ///
+    /// - Returns: An operating-system resource card.
+    func operatingSystemCard(
         _ option: OperatingSystemResource,
         @ViewBuilder actions: () -> some View
     ) -> some View {
@@ -269,7 +285,12 @@ struct MultiOSSetupView: View {
         }
     }
 
-    private func operatingSystemCard(_ option: OperatingSystemResource) -> some View {
+    /// Creates an operating-system card with its standard download action.
+    ///
+    /// - Parameter option: The operating-system resource to display.
+    ///
+    /// - Returns: An operating-system resource card.
+    func operatingSystemCard(_ option: OperatingSystemResource) -> some View {
         operatingSystemCard(option) {
             Button("Official Download") {
                 open(option.downloadPage)
@@ -277,7 +298,14 @@ struct MultiOSSetupView: View {
         }
     }
 
-    private func setupCard(
+    /// Creates the shared resource-card layout.
+    ///
+    /// - Parameters:
+    ///   - resource: The operating-system resource to display.
+    ///   - actions:  The actions displayed in the card.
+    ///
+    /// - Returns: A shared resource-card view.
+    func setupCard(
         _ resource: OperatingSystemResource,
         @ViewBuilder actions: () -> some View
     ) -> some View {
@@ -308,14 +336,18 @@ struct MultiOSSetupView: View {
         }
     }
 
-    private func open(_ value: String) {
+    /// Opens a validated resource URL.
+    ///
+    /// - Parameter value: The URL string to open.
+    func open(_ value: String) {
         guard let url: URL = URL(string: value) else {
             return
         }
         openURL(url)
     }
 
-    private func copyAsahiCommand() {
+    /// Copies the official Asahi setup command without executing it.
+    func copyAsahiCommand() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString("curl https://alx.sh | sh", forType: .string)
         copiedAsahiCommand = true
