@@ -11,6 +11,7 @@ struct LogView: View {
     @AppStorage("logDetailLevel")
     private var detailLevel: LogLevel = .info
     var logEntries: [LogEntry]
+    var embedded: Bool = false
     @State private var selectedLogEntries: Set<LogEntry.ID> = []
     @State private var searchString: String = ""
     @State private var savePanel: NSSavePanel = .init()
@@ -40,47 +41,61 @@ struct LogView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Table(filteredLogEntries, selection: $selectedLogEntries) {
-                TableColumn("Timestamp") { logEntry in
-                    Text(logEntry.timestamp.ISO8601Format())
-                }
-                .width(timeColumnWidth)
-                TableColumn("Level") { logEntry in
-                    HStack {
-                        Circle()
-                            .fill(logEntry.level.color)
-                            .frame(width: levelCircleRadius, height: levelCircleRadius)
-                        Text(logEntry.level.description)
-                        Spacer()
-                    }
-                }
-                .width(levelColumnWidth)
-                TableColumn("Message") { logEntry in
-                    Text(logEntry.message)
-                        .help(logEntry.message)
-                }
-            }
-            .textSelection(.enabled)
+            logTable
             Divider()
-            HStack {
-                Spacer()
-                Button("Export Log...") {
-                    export()
+            footer
+        }
+        .frame(
+            minWidth: embedded ? 620 : width,
+            idealWidth: width,
+            maxWidth: embedded ? .infinity : width,
+            minHeight: embedded ? 480 : height,
+            idealHeight: height,
+            maxHeight: embedded ? .infinity : height
+        )
+        .searchable(text: $searchString)
+    }
+
+    private var logTable: some View {
+        Table(filteredLogEntries, selection: $selectedLogEntries) {
+            TableColumn("Timestamp") { logEntry in
+                Text(logEntry.timestamp.ISO8601Format())
+            }
+            .width(timeColumnWidth)
+            TableColumn("Level") { logEntry in
+                HStack {
+                    Circle()
+                        .fill(logEntry.level.color)
+                        .frame(width: levelCircleRadius, height: levelCircleRadius)
+                    Text(logEntry.level.description)
+                    Spacer()
                 }
             }
-            .padding()
+            .width(levelColumnWidth)
+            TableColumn("Message") { logEntry in
+                Text(logEntry.message)
+                    .help(logEntry.message)
+            }
         }
-        .frame(minWidth: width, minHeight: height)
-        .toolbar {
+        .textSelection(.enabled)
+    }
+
+    private var footer: some View {
+        HStack {
             Picker("Detail Level", selection: $detailLevel) {
                 ForEach(LogLevel.allCases.reversed()) { logLevel in
                     Text(logLevel.detailLevelDescription)
                         .tag(logLevel)
                 }
             }
-            .help("Detail Level")
+            .frame(maxWidth: 220)
+
+            Spacer()
+            Button("Export Log...") {
+                export()
+            }
         }
-        .searchable(text: $searchString)
+        .padding()
     }
 
     private func export() {
@@ -115,5 +130,6 @@ struct LogView: View {
 struct LogView_Previews: PreviewProvider {
     static var previews: some View {
         LogView(logEntries: [.example])
+        LogView(logEntries: [.example], embedded: true)
     }
 }

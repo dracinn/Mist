@@ -39,6 +39,8 @@ struct MistTask: Identifiable {
             case .verify, .copy:
                 prefix = "\(prefix.dropLast(1))ied"
             }
+        case .cancelled:
+            prefix = "Cancelled \(prefix.lowercased())"
         case .error:
             switch type {
             case .configure, .move, .create, .remove:

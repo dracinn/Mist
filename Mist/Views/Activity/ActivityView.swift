@@ -8,12 +8,80 @@
 import Combine
 import SwiftUI
 
+/// Holds an activity window without participating in its view-retention graph.
+@MainActor
+private final class ActivityWindowReference {
+    /// The currently presented activity window.
+    weak var window: NSWindow?
+}
+
+/// Presents task progress in a window that does not block the main workspace.
+@MainActor
+enum ActivityWindowPresenter {
+    /// Activity windows retained while their operations are visible.
+    private static var windows: [NSWindow] = []
+
+    // swiftlint:disable function_parameter_count
+    /// Opens a non-blocking activity window for the prepared task queue.
+    ///
+    /// - Parameters:
+    ///   - downloadType:   The kind of Apple content being processed.
+    ///   - imageName:      The system image displayed for the operation.
+    ///   - name:           The release name displayed in the activity header.
+    ///   - version:        The release version displayed in the activity header.
+    ///   - build:          The release build displayed in the activity header.
+    ///   - beta:           Whether the selected release is a beta.
+    ///   - destinationURL: The operation's output location, when available.
+    ///   - taskManager:    The shared manager containing the prepared task queue.
+    ///   - onClose:        Work to perform after the activity window closes.
+    static func present(
+        downloadType: DownloadType,
+        imageName: String,
+        name: String,
+        version: String,
+        build: String,
+        beta: Bool,
+        destinationURL: URL?,
+        taskManager: TaskManager,
+        onClose: @escaping () -> Void
+    ) {
+        let windowReference: ActivityWindowReference = .init()
+        let content: ActivityView = .init(
+            downloadType: downloadType,
+            imageName: imageName,
+            name: name,
+            version: version,
+            build: build,
+            beta: beta,
+            destinationURL: destinationURL,
+            taskManager: taskManager
+        ) {
+            guard let window = windowReference.window else {
+                return
+            }
+
+            onClose()
+            window.close()
+            windows.removeAll { $0 === window }
+        }
+        let hostingController: NSHostingController<ActivityView> = .init(rootView: content)
+        let window: NSWindow = .init(contentViewController: hostingController)
+        windowReference.window = window
+        window.title = "Mist Activity"
+        window.styleMask = [.titled, .miniaturizable]
+        window.isReleasedWhenClosed = false
+        window.center()
+        windows.append(window)
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    // swiftlint:enable function_parameter_count
+}
+
 struct ActivityView: View {
     // swiftlint:disable:next weak_delegate
     @NSApplicationDelegateAdaptor(AppDelegate.self)
     var appDelegate: AppDelegate
-    @Environment(\.presentationMode)
-    var presentationMode: Binding<PresentationMode>
     @AppStorage("enableNotifications")
     private var enableNotifications: Bool = false
     @AppStorage("showInFinder")
@@ -26,11 +94,13 @@ struct ActivityView: View {
     var beta: Bool
     var destinationURL: URL?
     @ObservedObject var taskManager: TaskManager
+    var onClose: () -> Void = {}
     @State private var currentTaskId: String?
     @State private var value: Double = 0
     @State private var showAlert: Bool = false
     @State private var alertType: ProgressAlertType = .cancel
     @State private var error: MistError?
+    @State private var cancelling: Bool = false
     @State private var degrees: CGFloat = 0
     @State private var timer: Publishers.Autoconnect<Timer.TimerPublisher> = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     private let width: CGFloat = 420
@@ -44,10 +114,14 @@ struct ActivityView: View {
     }
 
     private var buttonText: String {
-        switch taskManager.currentState {
+        if cancelling {
+            return "Cancelling…"
+        }
+
+        return switch taskManager.currentState {
         case .pending, .inProgress:
             "Cancel"
-        case .complete, .error:
+        case .complete, .cancelled, .error:
             "Close"
         }
     }
@@ -91,6 +165,7 @@ struct ActivityView: View {
                 Button(buttonText) {
                     stop()
                 }
+                .disabled(cancelling)
                 .keyboardShortcut(.escape, modifiers: [])
             }
             .padding()
@@ -117,7 +192,7 @@ struct ActivityView: View {
                     message: Text("This process cannot be resumed once it has been cancelled."),
                     primaryButton: .default(Text("Resume")),
                     // swiftlint:disable:next trailing_closure
-                    secondaryButton: .destructive(Text("Cancel"), action: { cancel() })
+                    secondaryButton: .destructive(Text("Cancel"), action: { Task { await cancel() } })
                 )
             case .error:
                 Alert(
@@ -217,18 +292,40 @@ struct ActivityView: View {
         case .pending, .inProgress:
             alertType = .cancel
             showAlert.toggle()
-        case .complete, .error:
-            presentationMode.wrappedValue.dismiss()
+        case .complete, .cancelled, .error:
+            onClose()
         }
     }
 
-    private func cancel() {
+    private func cancel() async {
+        guard !cancelling else {
+            return
+        }
+
+        cancelling = true
         timer.upstream.connect().cancel()
         DownloadManager.shared.cancelTask()
         taskManager.cancelTask()
         ShellExecutor.shared.terminate()
-        _ = Task { try await ProcessKiller.kill() }
-        presentationMode.wrappedValue.dismiss()
+
+        do {
+            try await ProcessKiller.kill()
+        } catch {
+            LogManager.shared.log(.warning, message: "Unable to terminate the privileged helper process: \(error.localizedDescription)")
+        }
+
+        _ = await taskManager.task.result
+        markUnfinishedTasksCancelled()
+        onClose()
+    }
+
+    private func markUnfinishedTasksCancelled() {
+        for taskGroupIndex in taskManager.taskGroups.indices {
+            for taskIndex in taskManager.taskGroups[taskGroupIndex].tasks.indices
+                where taskManager.taskGroups[taskGroupIndex].tasks[taskIndex].state != .complete {
+                taskManager.taskGroups[taskGroupIndex].tasks[taskIndex].state = .cancelled
+            }
+        }
     }
 }
 

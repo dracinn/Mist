@@ -21,15 +21,19 @@ struct MistApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(refreshing: $refreshing, tasksInProgress: $tasksInProgress)
-                .onReceive(NotificationCenter.default.publisher(for: NSApplication.willUpdateNotification)) { _ in
-                    hideZoomButton()
+            ContentView(
+                refreshing: $refreshing,
+                tasksInProgress: $tasksInProgress,
+                sparkleUpdater: sparkleUpdater
+            )
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.willUpdateNotification)) { _ in
+                hideZoomButton()
+            }
+            .onAppear {
+                if #unavailable(macOS 26) {
+                    setAppIcon()
                 }
-                .onAppear {
-                    if #unavailable(macOS 26) {
-                        setAppIcon()
-                    }
-                }
+            }
         }
         .fixedWindow()
         .commands {

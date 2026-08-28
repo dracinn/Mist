@@ -11,6 +11,7 @@ enum MistTaskState: String {
     case pending = "Pending"
     case inProgress = "In Progress"
     case complete = "Complete"
+    case cancelled = "Cancelled"
     case error = "Error"
 
     var imageName: String {
@@ -21,6 +22,8 @@ enum MistTaskState: String {
             "gear.circle.fill"
         case .complete:
             "checkmark.circle.fill"
+        case .cancelled:
+            "minus.circle.fill"
         case .error:
             "xmark.circle.fill"
         }
@@ -34,6 +37,8 @@ enum MistTaskState: String {
             .blue
         case .complete:
             .green
+        case .cancelled:
+            .gray
         case .error:
             .red
         }

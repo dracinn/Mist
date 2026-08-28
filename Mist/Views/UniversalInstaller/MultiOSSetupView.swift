@@ -11,22 +11,38 @@ struct MultiOSSetupView: View {
     @Environment(\.openURL)
     private var openURL: OpenURLAction
     var installers: [Installer]
+    var embedded: Bool = false
     @State private var selection: MultiOSSection = .macOS
     @State private var showMacOSPlanner: Bool = false
     @State private var copiedAsahiCommand: Bool = false
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            Divider()
-            HSplitView {
-                sidebar
-                detail
+            if !embedded {
+                header
+                Divider()
             }
+
+            if embedded {
+                embeddedNavigation
+                Divider()
+                detail
+            } else {
+                HSplitView {
+                    sidebar
+                    detail
+                }
+            }
+
             Divider()
             safetyFooter
         }
-        .frame(width: 900, height: 660)
+        .frame(
+            minWidth: embedded ? 680 : 900,
+            idealWidth: 900,
+            minHeight: embedded ? 540 : 660,
+            idealHeight: 660
+        )
         .sheet(isPresented: $showMacOSPlanner) {
             UniversalInstallerPreviewView(installers: installers)
         }
@@ -38,7 +54,7 @@ struct MultiOSSetupView: View {
                 Text("Multi-OS Setup")
                     .font(.title2)
                     .fontWeight(.semibold)
-                Text("Official downloads and safe planning for Apple Intel and Apple-silicon Macs.")
+                Text("Official downloads and safe planning for genuine Intel and Apple Silicon Macs.")
                     .foregroundColor(.secondary)
             }
             Spacer()
@@ -50,22 +66,49 @@ struct MultiOSSetupView: View {
         .padding()
     }
 
+    private var embeddedNavigation: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Multi-OS Setup")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    Text("Mac hardware only — choose an Intel Mac or Apple Silicon workflow.")
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+            }
+
+            Picker("Platform", selection: $selection) {
+                ForEach(MultiOSSection.allCases) { section in
+                    Label(section.title, systemImage: section.systemImage)
+                        .tag(section)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+        }
+        .padding(20)
+    }
+
     private var sidebar: some View {
         List {
-            ForEach(MultiOSSection.allCases) { section in
-                Button {
-                    selection = section
-                } label: {
-                    HStack {
-                        Label(section.title, systemImage: section.systemImage)
-                        Spacer()
-                        if selection == section {
-                            Image(systemName: "checkmark")
+            Section("Mac Platforms") {
+                ForEach(MultiOSSection.allCases) { section in
+                    Button {
+                        selection = section
+                    } label: {
+                        HStack {
+                            Label(section.title, systemImage: section.systemImage)
+                            Spacer()
+                            if selection == section {
+                                Image(systemName: "checkmark")
+                            }
                         }
+                        .contentShape(Rectangle())
                     }
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .listStyle(.sidebar)
@@ -84,10 +127,10 @@ struct MultiOSSetupView: View {
                     appleSiliconSection
                 }
             }
-            .padding()
+            .padding(24)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(minWidth: 600)
+        .frame(minWidth: 540)
     }
 
     private var macOSSection: some View {
@@ -131,8 +174,8 @@ struct MultiOSSetupView: View {
     private var intelSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
-                "Intel Mac Downloads — x86-64",
-                subtitle: "Official Windows and Linux download pages for Intel-based Macs."
+                "Intel Macs — x86-64",
+                subtitle: "Official Windows and Linux download pages for genuine Intel-based Macs."
             )
 
             Label(
@@ -172,8 +215,8 @@ struct MultiOSSetupView: View {
     private var appleSiliconSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
-                "Apple Silicon — ARM64",
-                subtitle: "Native Linux setup for supported Apple-silicon Macs through Asahi Linux."
+                "Apple Silicon Macs — ARM64",
+                subtitle: "Native Linux setup for supported Apple Silicon Macs through Asahi Linux."
             )
 
             operatingSystemCard(OperatingSystemResource.fedoraAsahi) {
@@ -186,7 +229,7 @@ struct MultiOSSetupView: View {
             }
 
             Label(
-                "Mist Universal never runs the Asahi installer automatically. Read the official model support and backup instructions first.",
+                "Mist Universal never runs the Asahi installer automatically. Read the official Mac model support and backup instructions first.",
                 systemImage: "checkmark.shield"
             )
             .foregroundColor(.secondary)
@@ -195,24 +238,42 @@ struct MultiOSSetupView: View {
 
     private var safetyFooter: some View {
         Label(
-            "Resource screen only — no downloads, scripts, partitions, or boot files are changed automatically.",
+            "Mac-only resource screen — no downloads, scripts, partitions, or boot files are changed automatically.",
             systemImage: "checkmark.shield"
         )
         .foregroundColor(.secondary)
-        .padding()
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
 
-    private func sectionHeader(_ title: String, subtitle: String) -> some View {
+private extension MultiOSSetupView {
+    /// Creates a section heading with supporting text.
+    ///
+    /// - Parameters:
+    ///   - title:    The section title.
+    ///   - subtitle: Supporting section text.
+    ///
+    /// - Returns: A section-heading view.
+    func sectionHeader(_ title: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.title3)
+                .font(.title2)
                 .fontWeight(.semibold)
             Text(subtitle)
                 .foregroundColor(.secondary)
         }
     }
 
-    private func operatingSystemCard(
+    /// Creates an operating-system card with custom actions.
+    ///
+    /// - Parameters:
+    ///   - option:  The operating-system resource to display.
+    ///   - actions: The actions displayed in the card.
+    ///
+    /// - Returns: An operating-system resource card.
+    func operatingSystemCard(
         _ option: OperatingSystemResource,
         @ViewBuilder actions: () -> some View
     ) -> some View {
@@ -224,7 +285,12 @@ struct MultiOSSetupView: View {
         }
     }
 
-    private func operatingSystemCard(_ option: OperatingSystemResource) -> some View {
+    /// Creates an operating-system card with its standard download action.
+    ///
+    /// - Parameter option: The operating-system resource to display.
+    ///
+    /// - Returns: An operating-system resource card.
+    func operatingSystemCard(_ option: OperatingSystemResource) -> some View {
         operatingSystemCard(option) {
             Button("Official Download") {
                 open(option.downloadPage)
@@ -232,7 +298,14 @@ struct MultiOSSetupView: View {
         }
     }
 
-    private func setupCard(
+    /// Creates the shared resource-card layout.
+    ///
+    /// - Parameters:
+    ///   - resource: The operating-system resource to display.
+    ///   - actions:  The actions displayed in the card.
+    ///
+    /// - Returns: A shared resource-card view.
+    func setupCard(
         _ resource: OperatingSystemResource,
         @ViewBuilder actions: () -> some View
     ) -> some View {
@@ -263,14 +336,18 @@ struct MultiOSSetupView: View {
         }
     }
 
-    private func open(_ value: String) {
+    /// Opens a validated resource URL.
+    ///
+    /// - Parameter value: The URL string to open.
+    func open(_ value: String) {
         guard let url: URL = URL(string: value) else {
             return
         }
         openURL(url)
     }
 
-    private func copyAsahiCommand() {
+    /// Copies the official Asahi setup command without executing it.
+    func copyAsahiCommand() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString("curl https://alx.sh | sh", forType: .string)
         copiedAsahiCommand = true
