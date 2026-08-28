@@ -99,12 +99,18 @@ final class UniversalInstallerTests: XCTestCase {
     }
 
     func testMultiOSResourcesKeepArchitectureBoundaries() {
-        let intelNames: Set<String> = Set(OperatingSystemResource.intelMacOptions.map(\.name))
+        let linuxNames: Set<String> = Set(OperatingSystemResource.intelLinuxOptions.map(\.name))
 
         XCTAssertEqual(
-            intelNames,
-            ["Windows 10", "Windows 11", "Ubuntu Desktop", "Fedora Workstation", "Debian"]
+            linuxNames,
+            [
+                "Ubuntu", "Fedora Workstation", "Debian", "Linux Mint", "Pop!_OS", "openSUSE Tumbleweed",
+                "RHEL", "Rocky Linux", "Zorin OS", "Bazzite", "SteamOS", "CachyOS", "Nobara Linux",
+                "Garuda Linux", "Fedora KDE", "Arch Linux", "EndeavourOS", "Lubuntu", "Xubuntu", "MX Linux",
+                "antiX", "Puppy Linux", "Bodhi Linux", "Peppermint OS", "Alpine Linux", "elementary OS"
+            ]
         )
+        XCTAssertEqual(linuxNames.count, OperatingSystemResource.intelLinuxOptions.count)
         XCTAssertEqual(OperatingSystemResource.fedoraAsahi.architecture, "Apple Silicon / ARM64")
         XCTAssertTrue(
             OperatingSystemResource.intelMacOptions
