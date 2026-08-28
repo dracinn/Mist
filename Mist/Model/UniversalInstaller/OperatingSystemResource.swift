@@ -74,8 +74,8 @@ extension OperatingSystemResource {
         systemImage: "wrench.and.screwdriver"
     )
 
-    /// Official Windows and Linux resources for Intel Macs.
-    static let intelMacOptions: [OperatingSystemResource] = [
+    /// Official Windows resources for Intel Macs.
+    static let intelWindowsOptions: [OperatingSystemResource] = [
         .init(
             name: "Windows 10",
             architecture: "x86-64",
@@ -93,35 +93,43 @@ extension OperatingSystemResource {
             downloadPage: "https://www.microsoft.com/software-download/windows11",
             setupGuide: "https://www.microsoft.com/windows/windows-11-specifications",
             systemImage: "desktopcomputer"
-        ),
-        .init(
-            name: "Ubuntu Desktop",
-            architecture: "x86-64 / AMD64",
-            summary: "Ubuntu Desktop installation and live USB image.",
-            supportNote: "Hardware support varies by Intel Mac model; test live media before installing.",
-            downloadPage: "https://ubuntu.com/download/desktop",
-            setupGuide: "https://ubuntu.com/desktop/docs/en/latest/tutorial/install-ubuntu-desktop/",
-            systemImage: "terminal"
-        ),
-        .init(
-            name: "Fedora Workstation",
-            architecture: "x86-64",
-            summary: "Fedora Workstation live ISO and checksum resources.",
-            supportNote: "Use the official x86-64 image. Intel Mac hardware support varies by model.",
-            downloadPage: "https://www.fedoraproject.org/workstation/download/",
-            setupGuide: "https://docs.fedoraproject.org/en-US/fedora/latest/getting-started/",
-            systemImage: "f.circle"
-        ),
-        .init(
-            name: "Debian",
-            architecture: "AMD64 / Intel 64",
-            summary: "Debian stable net installer, live images, and full installation media.",
-            supportNote: "Choose a 64-bit PC image. Wi-Fi or other drivers may vary by Intel Mac model.",
-            downloadPage: "https://www.debian.org/distrib/",
-            setupGuide: "https://www.debian.org/releases/stable/amd64/",
-            systemImage: "shippingbox"
         )
     ]
+
+    /// Official x86-64 Linux distribution download resources for Intel Macs.
+    static let intelLinuxOptions: [OperatingSystemResource] = [
+        intelLinuxResource(name: "Ubuntu", downloadPage: "https://ubuntu.com/download/desktop"),
+        intelLinuxResource(name: "Fedora Workstation", downloadPage: "https://www.fedoraproject.org/workstation/download/"),
+        intelLinuxResource(name: "Debian", downloadPage: "https://www.debian.org/distrib/"),
+        intelLinuxResource(name: "Linux Mint", downloadPage: "https://www.linuxmint.com/download.php"),
+        intelLinuxResource(name: "Pop!_OS", downloadPage: "https://system76.com/pop/download/"),
+        intelLinuxResource(name: "openSUSE Tumbleweed", downloadPage: "https://get.opensuse.org/tumbleweed/"),
+        intelLinuxResource(name: "RHEL", downloadPage: "https://developers.redhat.com/products/rhel/download"),
+        intelLinuxResource(name: "Rocky Linux", downloadPage: "https://rockylinux.org/download"),
+        intelLinuxResource(name: "Zorin OS", downloadPage: "https://zorin.com/os/download/"),
+        intelLinuxResource(name: "Bazzite", downloadPage: "https://bazzite.gg/"),
+        intelLinuxResource(name: "SteamOS", downloadPage: "https://store.steampowered.com/steamos/"),
+        intelLinuxResource(name: "CachyOS", downloadPage: "https://cachyos.org/download/"),
+        intelLinuxResource(name: "Nobara Linux", downloadPage: "https://nobaraproject.org/download.html"),
+        intelLinuxResource(name: "Garuda Linux", downloadPage: "https://garudalinux.org/downloads"),
+        intelLinuxResource(name: "Fedora KDE", downloadPage: "https://fedoraproject.org/kde/download"),
+        intelLinuxResource(name: "Arch Linux", downloadPage: "https://archlinux.org/download/"),
+        intelLinuxResource(name: "EndeavourOS", downloadPage: "https://endeavouros.com/"),
+        intelLinuxResource(name: "Lubuntu", downloadPage: "https://lubuntu.me/downloads/"),
+        intelLinuxResource(name: "Xubuntu", downloadPage: "https://xubuntu.org/download/"),
+        intelLinuxResource(name: "MX Linux", downloadPage: "https://mxlinux.org/download-links/"),
+        intelLinuxResource(name: "antiX", downloadPage: "https://antixlinux.com/download/"),
+        intelLinuxResource(name: "Puppy Linux", downloadPage: "https://puppylinux-woof-ce.github.io/"),
+        intelLinuxResource(name: "Bodhi Linux", downloadPage: "https://www.bodhilinux.com/download/"),
+        intelLinuxResource(name: "Peppermint OS", downloadPage: "https://peppermintos.com/"),
+        intelLinuxResource(name: "Alpine Linux", downloadPage: "https://www.alpinelinux.org/downloads/"),
+        intelLinuxResource(name: "elementary OS", downloadPage: "https://elementary.io/")
+    ]
+
+    /// All official external operating-system resources for Intel Macs.
+    static var intelMacOptions: [OperatingSystemResource] {
+        intelWindowsOptions + intelLinuxOptions
+    }
 
     /// Official Asahi Linux resource for supported Apple-silicon Macs.
     static let fedoraAsahi: OperatingSystemResource = .init(
@@ -133,4 +141,17 @@ extension OperatingSystemResource {
         setupGuide: "https://docs.fedoraproject.org/en-US/fedora-asahi-remix/",
         systemImage: "apple.logo"
     )
+
+    /// Creates a compact Intel Linux download entry.
+    private static func intelLinuxResource(name: String, downloadPage: String) -> OperatingSystemResource {
+        .init(
+            name: name,
+            architecture: "x86-64",
+            summary: "",
+            supportNote: "",
+            downloadPage: downloadPage,
+            setupGuide: downloadPage,
+            systemImage: "terminal"
+        )
+    }
 }

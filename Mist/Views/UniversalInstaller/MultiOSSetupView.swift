@@ -141,8 +141,30 @@ struct MultiOSSetupView: View {
             )
             .foregroundColor(.orange)
 
-            ForEach(OperatingSystemResource.intelMacOptions) { option in
+            ForEach(OperatingSystemResource.intelWindowsOptions) { option in
                 operatingSystemCard(option)
+            }
+
+            linuxDistributionList
+        }
+    }
+
+    private var linuxDistributionList: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 8)], spacing: 8) {
+            ForEach(OperatingSystemResource.intelLinuxOptions) { distribution in
+                Button {
+                    open(distribution.downloadPage)
+                } label: {
+                    HStack {
+                        Text(distribution.name)
+                        Spacer()
+                        Image(systemName: "arrow.down.circle")
+                    }
+                    .padding(8)
+                    .background(Color.secondary.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+                .buttonStyle(.plain)
             }
         }
     }
