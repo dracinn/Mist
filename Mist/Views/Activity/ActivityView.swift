@@ -8,6 +8,13 @@
 import Combine
 import SwiftUI
 
+/// Holds an activity window without participating in its view-retention graph.
+@MainActor
+private final class ActivityWindowReference {
+    /// The currently presented activity window.
+    weak var window: NSWindow?
+}
+
 /// Presents task progress in a window that does not block the main workspace.
 @MainActor
 enum ActivityWindowPresenter {
@@ -38,7 +45,7 @@ enum ActivityWindowPresenter {
         taskManager: TaskManager,
         onClose: @escaping () -> Void
     ) {
-        var activityWindow: NSWindow?
+        let windowReference: ActivityWindowReference = .init()
         let content: ActivityView = .init(
             downloadType: downloadType,
             imageName: imageName,
@@ -49,7 +56,7 @@ enum ActivityWindowPresenter {
             destinationURL: destinationURL,
             taskManager: taskManager
         ) {
-            guard let window = activityWindow else {
+            guard let window = windowReference.window else {
                 return
             }
 
@@ -59,7 +66,7 @@ enum ActivityWindowPresenter {
         }
         let hostingController: NSHostingController<ActivityView> = .init(rootView: content)
         let window: NSWindow = .init(contentViewController: hostingController)
-        activityWindow = window
+        windowReference.window = window
         window.title = "Mist Activity"
         window.styleMask = [.titled, .miniaturizable]
         window.isReleasedWhenClosed = false
