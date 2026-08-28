@@ -30,6 +30,10 @@ class TaskManager: ObservableObject {
             return .pending
         }
 
+        if states.contains(.cancelled) {
+            return .cancelled
+        }
+
         return .complete
     }
 

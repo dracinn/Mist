@@ -100,6 +100,7 @@ struct ActivityView: View {
     @State private var showAlert: Bool = false
     @State private var alertType: ProgressAlertType = .cancel
     @State private var error: MistError?
+    @State private var cancelling: Bool = false
     @State private var degrees: CGFloat = 0
     @State private var timer: Publishers.Autoconnect<Timer.TimerPublisher> = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     private let width: CGFloat = 420
@@ -113,10 +114,14 @@ struct ActivityView: View {
     }
 
     private var buttonText: String {
-        switch taskManager.currentState {
+        if cancelling {
+            return "Cancelling…"
+        }
+
+        return switch taskManager.currentState {
         case .pending, .inProgress:
             "Cancel"
-        case .complete, .error:
+        case .complete, .cancelled, .error:
             "Close"
         }
     }
@@ -160,6 +165,7 @@ struct ActivityView: View {
                 Button(buttonText) {
                     stop()
                 }
+                .disabled(cancelling)
                 .keyboardShortcut(.escape, modifiers: [])
             }
             .padding()
@@ -186,7 +192,7 @@ struct ActivityView: View {
                     message: Text("This process cannot be resumed once it has been cancelled."),
                     primaryButton: .default(Text("Resume")),
                     // swiftlint:disable:next trailing_closure
-                    secondaryButton: .destructive(Text("Cancel"), action: { cancel() })
+                    secondaryButton: .destructive(Text("Cancel"), action: { Task { await cancel() } })
                 )
             case .error:
                 Alert(
@@ -286,18 +292,40 @@ struct ActivityView: View {
         case .pending, .inProgress:
             alertType = .cancel
             showAlert.toggle()
-        case .complete, .error:
+        case .complete, .cancelled, .error:
             onClose()
         }
     }
 
-    private func cancel() {
+    private func cancel() async {
+        guard !cancelling else {
+            return
+        }
+
+        cancelling = true
         timer.upstream.connect().cancel()
         DownloadManager.shared.cancelTask()
         taskManager.cancelTask()
         ShellExecutor.shared.terminate()
-        _ = Task { try await ProcessKiller.kill() }
+
+        do {
+            try await ProcessKiller.kill()
+        } catch {
+            LogManager.shared.log(.warning, message: "Unable to terminate the privileged helper process: \(error.localizedDescription)")
+        }
+
+        _ = await taskManager.task.result
+        markUnfinishedTasksCancelled()
         onClose()
+    }
+
+    private func markUnfinishedTasksCancelled() {
+        for taskGroupIndex in taskManager.taskGroups.indices {
+            for taskIndex in taskManager.taskGroups[taskGroupIndex].tasks.indices
+                where taskManager.taskGroups[taskGroupIndex].tasks[taskIndex].state != .complete {
+                taskManager.taskGroups[taskGroupIndex].tasks[taskIndex].state = .cancelled
+            }
+        }
     }
 }
 
