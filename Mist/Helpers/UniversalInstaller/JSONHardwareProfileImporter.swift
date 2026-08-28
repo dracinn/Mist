@@ -24,8 +24,21 @@ struct JSONHardwareProfileImporter: HardwareProfiling {
             throw HardwareProfileImportError.tooManyDevices(maximum: maximumDeviceCount)
         }
 
+        let manufacturer: String = try normalizedRequired(report.manufacturer, field: "manufacturer")
+        guard manufacturer.caseInsensitiveCompare("Apple Inc.") == .orderedSame else {
+            throw HardwareProfileImportError.unsupportedManufacturer(manufacturer)
+        }
+
+        let modelIdentifier: String = try normalizedRequired(report.modelIdentifier, field: "modelIdentifier")
+        guard isAppleModelIdentifier(modelIdentifier) else {
+            throw HardwareProfileImportError.invalidAppleModelIdentifier(modelIdentifier)
+        }
+
         return try HardwareProfile(
             schemaVersion: report.schemaVersion,
+            manufacturer: "Apple Inc.",
+            platform: report.platform,
+            modelIdentifier: modelIdentifier,
             modelName: normalizedOptional(report.modelName, field: "modelName"),
             boardName: normalizedOptional(report.boardName, field: "boardName"),
             devices: report.devices.map(makeDevice),
@@ -65,7 +78,6 @@ struct JSONHardwareProfileImporter: HardwareProfiling {
             throw HardwareProfileImportError.fileTooLarge(maximumBytes: maximumFileBytes)
         }
 
-        let data: Data
         do {
             return try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
         } catch {
@@ -107,6 +119,13 @@ struct JSONHardwareProfileImporter: HardwareProfiling {
         }
         return try normalizedRequired(value, field: field)
     }
+
+    private func isAppleModelIdentifier(_ value: String) -> Bool {
+        value.range(
+            of: #"^(MacBook|MacBookAir|MacBookPro|Macmini|iMac|iMacPro|MacPro|Xserve|Mac)[0-9]+,[0-9]+$"#,
+            options: .regularExpression
+        ) != nil
+    }
 }
 
 enum HardwareProfileImportError: LocalizedError, Equatable {
@@ -120,6 +139,8 @@ enum HardwareProfileImportError: LocalizedError, Equatable {
     case emptyDeviceList
     case tooManyDevices(maximum: Int)
     case emptyField(String)
+    case unsupportedManufacturer(String)
+    case invalidAppleModelIdentifier(String)
     case localHardwareDiscoveryUnavailable
 
     var errorDescription: String? {
@@ -144,6 +165,10 @@ enum HardwareProfileImportError: LocalizedError, Equatable {
             "The hardware report contains more than \(maximum) devices."
         case let .emptyField(field):
             "The hardware report contains an empty \(field) field."
+        case let .unsupportedManufacturer(manufacturer):
+            "Hardware from \(manufacturer) is outside this app's Apple Mac support scope."
+        case let .invalidAppleModelIdentifier(identifier):
+            "\(identifier) is not a recognized Apple Mac model identifier."
         case .localHardwareDiscoveryUnavailable:
             "Local hardware discovery is not available yet."
         }
@@ -152,6 +177,9 @@ enum HardwareProfileImportError: LocalizedError, Equatable {
 
 private struct JSONHardwareReport: Decodable {
     var schemaVersion: Int
+    var manufacturer: String
+    var platform: AppleHardwarePlatform
+    var modelIdentifier: String
     var modelName: String?
     var boardName: String?
     var devices: [JSONHardwareDevice]

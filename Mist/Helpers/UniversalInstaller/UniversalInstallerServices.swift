@@ -24,15 +24,17 @@ protocol CompatibilityResolving: Sendable {
     ) async throws -> CompatibilityReport
 }
 
-protocol OpenCoreManaging: Sendable {
-    func backupEFI(at url: URL, to destination: URL) async throws
-    func validateEFI(at url: URL) async throws
-    func generateEFI(
+protocol OpenCoreLegacyPatcherPreparing: Sendable {
+    func validateEligibility(
+        for profile: HardwareProfile,
+        target: InstallerTarget
+    ) async throws
+
+    func prepareInstallerSupport(
         for profile: HardwareProfile,
         target: InstallerTarget,
-        destination: URL
+        at destination: URL
     ) async throws
-    func deployEFI(from source: URL, to destination: URL) async throws
 }
 
 enum MacOSInstallerTargetError: LocalizedError, Equatable {

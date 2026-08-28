@@ -199,7 +199,7 @@ struct UniversalInstallerPreviewView: View {
 
     private var safetyFooter: some View {
         Label(
-            "Preview only — no disk, EFI, or OpenCore changes are performed.",
+            "Preview only — no disk, EFI, or OCLP changes are performed.",
             systemImage: "checkmark.shield"
         )
         .foregroundColor(.secondary)

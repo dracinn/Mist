@@ -11,14 +11,14 @@ final class UniversalInstallerTests: XCTestCase {
         let installer: Installer = .example
         let target: InstallerTarget = try MacOSInstallerTargetFactory().makeTarget(
             from: installer,
-            bootStrategy: .openCore
+            bootStrategy: .openCoreLegacyPatcher
         )
 
         XCTAssertEqual(target.name, "Install macOS Tahoe")
         XCTAssertEqual(target.version, "26.0")
         XCTAssertEqual(target.build, "25A354")
         XCTAssertEqual(target.kind, .fullInstaller)
-        XCTAssertEqual(target.bootStrategy, .openCore)
+        XCTAssertEqual(target.bootStrategy, .openCoreLegacyPatcher)
         XCTAssertEqual(target.requiredBytes, installer.size)
         XCTAssertGreaterThanOrEqual(target.minimumPartitionBytes, target.requiredBytes)
         XCTAssertEqual(target.source?.lastPathComponent, "InstallAssistant.pkg")
@@ -82,7 +82,7 @@ final class UniversalInstallerTests: XCTestCase {
     func testCatalogSelectionBuildsMultiMacOSPreview() throws {
         let installers: [Installer] = [.example] + Installer.legacyInstallers.prefix(1)
         let selections: [MacOSInstallerSelection] = [
-            MacOSInstallerSelection(installer: installers[0], bootStrategy: .openCore),
+            MacOSInstallerSelection(installer: installers[0], bootStrategy: .openCoreLegacyPatcher),
             MacOSInstallerSelection(installer: installers[1], bootStrategy: .nativeMacIntel)
         ]
         let preview: InstallerPlanPreview = try MacOSInstallerPreviewBuilder().preview(
@@ -94,7 +94,7 @@ final class UniversalInstallerTests: XCTestCase {
         XCTAssertEqual(preview.diskIdentifier, "Preview")
         XCTAssertEqual(preview.partitions.count, 3)
         XCTAssertEqual(preview.partitions.first?.name, "EFI")
-        XCTAssertEqual(preview.targets.map(\.bootStrategy), [.openCore, .nativeMacIntel])
+        XCTAssertEqual(preview.targets.map(\.bootStrategy), [.openCoreLegacyPatcher, .nativeMacIntel])
         XCTAssertGreaterThan(preview.remainingBytes, 0)
     }
 
@@ -104,7 +104,7 @@ final class UniversalInstallerTests: XCTestCase {
             version: "26.0",
             build: "25A354",
             kind: .fullInstaller,
-            bootStrategy: .openCore,
+            bootStrategy: .openCoreLegacyPatcher,
             requiredBytes: 16 * 1_024 * 1_024 * 1_024,
             minimumPartitionBytes: 20 * 1_024 * 1_024 * 1_024
         )
@@ -150,7 +150,7 @@ final class UniversalInstallerTests: XCTestCase {
             version: "26.0",
             build: "25A354",
             kind: .fullInstaller,
-            bootStrategy: .openCore,
+            bootStrategy: .openCoreLegacyPatcher,
             requiredBytes: 30 * 1_024 * 1_024 * 1_024,
             minimumPartitionBytes: 32 * 1_024 * 1_024 * 1_024
         )
@@ -170,7 +170,7 @@ final class UniversalInstallerTests: XCTestCase {
             version: "26.0",
             build: "25A354",
             kind: .fullInstaller,
-            bootStrategy: .openCore,
+            bootStrategy: .openCoreLegacyPatcher,
             requiredBytes: 16 * 1_024 * 1_024 * 1_024,
             minimumPartitionBytes: 20 * 1_024 * 1_024 * 1_024
         )
@@ -195,7 +195,7 @@ final class UniversalInstallerTests: XCTestCase {
             version: "26.0",
             build: "25A354",
             kind: .fullInstaller,
-            bootStrategy: .openCore,
+            bootStrategy: .openCoreLegacyPatcher,
             requiredBytes: 1,
             minimumPartitionBytes: .max
         )

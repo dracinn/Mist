@@ -1,28 +1,32 @@
-# Multi-macOS Installer / OpenCore Architecture
+# Multi-macOS Installer Architecture for Apple Macs
 
-This branch scaffolds a hardware-aware builder for multiple macOS installers on one drive without importing GPL source from TINU or other projects.
+This branch scaffolds a hardware-aware builder for multiple macOS installers on one drive. Hardware support is intentionally limited to genuine Apple Intel Macs and Apple-silicon Macs. Generic PCs and Hackintosh targets are out of scope.
 
 ## Design goals
 
 - Preserve Mist's existing Apple catalog, download, validation, caching, and installer export behavior.
 - Add a provider model for full macOS installers and macOS recovery media.
 - Add a disk planning layer for multiple macOS installer partitions and one EFI partition.
-- Add an OpenCore/EFI subsystem for x86 UEFI targets.
-- Keep native Intel Mac and Apple Silicon boot paths separate from OpenCore.
+- Support native installers for Apple Intel Macs and Apple-silicon Macs.
+- Treat OpenCore Legacy Patcher (OCLP) as an Intel-Mac-only compatibility path.
+- Keep Apple silicon on Apple's native installer and restore paths; never offer OCLP for Apple silicon.
 - Support imported hardware reports and future local hardware discovery.
-- Resolve hardware, selected OS, SMBIOS, OpenCore, kext, SSDT, and driver compatibility before writing media.
+- Resolve the Apple model identifier, platform, selected OS, and OCLP eligibility before writing media.
 - Keep privileged disk/EFI mutations behind the existing helper-tool boundary.
+- Reject generic PC and Hackintosh hardware profiles.
 
 ## Source inspiration and licensing
 
-Mist remains the application base. TINU, OC-Little-Translated, Hackintosh-for-All-Computers, Dortania documentation, and OpenCorePkg are references for behavior and architecture only. Do not copy GPL source into this MIT codebase unless the project intentionally changes licensing and satisfies all applicable obligations.
+Mist remains the application base. The official [OpenCore Legacy Patcher](https://github.com/dortania/OpenCore-Legacy-Patcher) project is the primary reference for legacy Intel Mac model eligibility and compatibility behavior. Its supported-model documentation explicitly excludes Apple silicon and unlisted machines.
+
+The archived [OCLP-Mod](https://github.com/laobamac/OCLP-Mod) project may be consulted only as a historical user-experience and compatibility reference. Mist does not use its PC/Hackintosh features, SimpleHac API, binaries, services, or support claims. Neither project is a source dependency, and GPL source must not be copied into this MIT codebase without an intentional licensing change and full license compliance.
 
 ## Proposed layers
 
 1. `UniversalInstaller` models describe targets, boot strategies, partitions, hardware, and compatibility.
 2. `InstallerProvider` implementations prepare one full macOS installer or recovery payload.
-3. `CompatibilityResolver` turns hardware + OS selection into requirements and warnings.
-4. `OpenCoreManager` owns EFI discovery, backup, generation, validation, and deployment.
+3. `CompatibilityResolver` turns Apple model + OS selection into requirements and warnings.
+4. A future OCLP adapter may prepare an eligible Intel Mac path without reimplementing or silently bundling OCLP.
 5. `InstallerPlanBuilder` produces a deterministic disk layout before any destructive operation.
 6. Existing Mist helper infrastructure performs privileged disk and EFI changes.
 
@@ -36,21 +40,24 @@ The installer catalog toolbar exposes a preview-only multi-selection sheet. It l
 
 The preview may read external physical-disk metadata through `diskutil` plist output. Discovery is restricted to writable, external, whole, physical devices with nonzero capacity; internal and virtual disks are excluded. This path invokes only `diskutil list` and `diskutil info` and cannot mount, unmount, erase, or partition media.
 
-Each selected macOS catalog entry carries its own boot strategy, allowing a single preview to model Native Intel, OpenCore, and Apple Silicon installer targets independently.
+Each selected macOS catalog entry carries its own boot strategy, allowing a single preview to model native Intel Mac, OCLP Intel Mac, and native Apple-silicon installer targets independently.
 
 Existing EFI partitions are discovered through read-only `diskutil list` and `diskutil info` plist queries. Discovery is scoped to a selected whole disk and returns partition identity, size, and existing mount state without mounting, unmounting, or modifying the EFI partition.
 
-Hardware profiles can be imported from a local, versioned JSON report. Import is read-only, limited to regular files of at most 1 MiB, rejects symbolic links, and validates schema version 1 before producing a normalized `HardwareProfile`. Local hardware probing remains intentionally unavailable.
+Hardware profiles can be imported from a local, versioned JSON report. Import is read-only, limited to regular files of at most 1 MiB, rejects symbolic links, and validates schema version 1 before producing a normalized `HardwareProfile`. A report must identify `Apple Inc.` as its manufacturer, declare either an Intel Mac or Apple-silicon Mac platform, and contain an Apple-style model identifier. These checks enforce product scope but are not cryptographic hardware attestation. Local hardware probing remains intentionally unavailable.
 
 ```json
 {
   "schemaVersion": 1,
-  "modelName": "Example Mac",
-  "boardName": "ExampleBoard",
+  "manufacturer": "Apple Inc.",
+  "platform": "intelMac",
+  "modelIdentifier": "MacBookPro11,3",
+  "modelName": "MacBook Pro (Retina, 15-inch, Mid 2014)",
+  "boardName": "Mac-2BD1B31983FE1663",
   "devices": [
     {
       "category": "cpu",
-      "name": "Example CPU",
+      "name": "Intel Core i7",
       "vendorID": "8086",
       "deviceID": "1234",
       "subsystemID": "5678"
@@ -63,24 +70,24 @@ Hardware profiles can be imported from a local, versioned JSON report. Import is
 ## Current scope
 
 - `nativeMacIntel`
-- `openCore`
+- `openCoreLegacyPatcher` (listed Intel Macs only)
 - `appleSilicon`
 
-OpenCore must never be treated as the Apple Silicon boot path.
+OCLP must never be treated as the Apple-silicon boot path. Generic OpenCore configuration generation, non-Apple SMBIOS identities, PC ACPI customization, and Hackintosh kext selection are explicitly excluded.
 
-Linux, Windows, generic UEFI, Asahi, shared data partitions, and arbitrary custom media are intentionally deferred.
+Linux, Windows, generic UEFI PCs, Hackintosh systems, Asahi, shared data partitions, and arbitrary custom media are intentionally excluded or deferred.
 
 ## Suggested build flow
 
 1. Select target drive.
 2. Add installer targets.
-3. Import or detect target hardware when OpenCore is selected.
+3. Import or detect the Apple model and platform when OCLP is selected for an Intel Mac.
 4. Resolve compatibility and required components.
 5. Calculate partition sizes and display the complete plan.
 6. Require an explicit destructive-action confirmation.
 7. Partition the drive.
 8. Install each target using its provider.
-9. Build/validate/deploy EFI where applicable.
+9. Prepare the OCLP path for an eligible Intel Mac where applicable.
 10. Verify expected boot files and installer payloads.
 
 ## Next implementation slices
@@ -90,5 +97,5 @@ Linux, Windows, generic UEFI, Asahi, shared data partitions, and arbitrary custo
 - Add a read-only UI for selecting and reviewing an imported hardware report.
 - Add an explicit, privileged EFI mounting abstraction after a dedicated safety review.
 - Add a macOS provider wrapping Mist's existing installer creation path.
-- Add OpenCore configuration generation as a separate service.
+- Add an OCLP supported-model data adapter with source/version provenance.
 - Add a second, explicit safety review before any future disk-writing implementation is designed.

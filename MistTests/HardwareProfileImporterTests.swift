@@ -24,7 +24,7 @@ final class HardwareProfileImporterTests: XCTestCase {
 
     func testImportsVersionOneJSONReport() async throws {
         let report: String =
-            #"{"schemaVersion":1,"modelName":"  Test Mac  ","boardName":"TestBoard","devices":["#
+            #"{"schemaVersion":1,"manufacturer":" Apple Inc. ","platform":"intelMac","modelIdentifier":"MacBookPro11,3","modelName":"  Test Mac  ","boardName":"TestBoard","devices":["#
                 + #"{"category":"cpu","name":" Intel Core CPU ","vendorID":" 8086 "},"#
                 + #"{"category":"gpu","name":"Example GPU","deviceID":"1234"}],"#
                 + #""acpiTableNames":[" DSDT ","SSDT-EC"]}"#
@@ -33,6 +33,9 @@ final class HardwareProfileImporterTests: XCTestCase {
         let profile: HardwareProfile = try await JSONHardwareProfileImporter().importProfile(from: url)
 
         XCTAssertEqual(profile.schemaVersion, 1)
+        XCTAssertEqual(profile.manufacturer, "Apple Inc.")
+        XCTAssertEqual(profile.platform, .intelMac)
+        XCTAssertEqual(profile.modelIdentifier, "MacBookPro11,3")
         XCTAssertEqual(profile.modelName, "Test Mac")
         XCTAssertEqual(profile.boardName, "TestBoard")
         XCTAssertEqual(profile.devices.map(\.category), [.cpu, .gpu])
@@ -53,7 +56,7 @@ final class HardwareProfileImporterTests: XCTestCase {
 
     func testRejectsUnsupportedSchemaVersion() async throws {
         let url: URL = try writeReport(
-            #"{"schemaVersion":2,"devices":[{"category":"cpu","name":"CPU"}],"acpiTableNames":[]}"#
+            #"{"schemaVersion":2,"manufacturer":"Apple Inc.","platform":"intelMac","modelIdentifier":"iMac14,2","devices":[{"category":"cpu","name":"CPU"}],"acpiTableNames":[]}"#
         )
 
         await assertThrowsErrorAsync {
@@ -68,7 +71,7 @@ final class HardwareProfileImporterTests: XCTestCase {
 
     func testRejectsEmptyDeviceList() async throws {
         let url: URL = try writeReport(
-            #"{"schemaVersion":1,"devices":[],"acpiTableNames":[]}"#
+            #"{"schemaVersion":1,"manufacturer":"Apple Inc.","platform":"intelMac","modelIdentifier":"iMac14,2","devices":[],"acpiTableNames":[]}"#
         )
 
         await assertThrowsErrorAsync {
@@ -95,7 +98,7 @@ final class HardwareProfileImporterTests: XCTestCase {
 
     func testRejectsEmptyDeviceName() async throws {
         let url: URL = try writeReport(
-            #"{"schemaVersion":1,"devices":[{"category":"cpu","name":"  "}],"acpiTableNames":[]}"#
+            #"{"schemaVersion":1,"manufacturer":"Apple Inc.","platform":"intelMac","modelIdentifier":"iMac14,2","devices":[{"category":"cpu","name":"  "}],"acpiTableNames":[]}"#
         )
 
         await assertThrowsErrorAsync {
@@ -108,9 +111,50 @@ final class HardwareProfileImporterTests: XCTestCase {
         }
     }
 
+    func testImportsAppleSiliconMacReport() async throws {
+        let url: URL = try writeReport(
+            #"{"schemaVersion":1,"manufacturer":"Apple Inc.","platform":"appleSiliconMac","modelIdentifier":"Mac14,2","devices":[{"category":"cpu","name":"Apple M2"}],"acpiTableNames":[]}"#
+        )
+
+        let profile: HardwareProfile = try await JSONHardwareProfileImporter().importProfile(from: url)
+
+        XCTAssertEqual(profile.platform, .appleSiliconMac)
+        XCTAssertEqual(profile.modelIdentifier, "Mac14,2")
+    }
+
+    func testRejectsNonAppleComputerReport() async throws {
+        let url: URL = try writeReport(
+            #"{"schemaVersion":1,"manufacturer":"Example PC Vendor","platform":"intelMac","modelIdentifier":"Desktop1,1","devices":[{"category":"cpu","name":"CPU"}],"acpiTableNames":[]}"#
+        )
+
+        await assertThrowsErrorAsync {
+            try await JSONHardwareProfileImporter().importProfile(from: url)
+        } errorHandler: { error in
+            XCTAssertEqual(
+                error as? HardwareProfileImportError,
+                .unsupportedManufacturer("Example PC Vendor")
+            )
+        }
+    }
+
+    func testRejectsNonAppleModelIdentifier() async throws {
+        let url: URL = try writeReport(
+            #"{"schemaVersion":1,"manufacturer":"Apple Inc.","platform":"intelMac","modelIdentifier":"Desktop1,1","devices":[{"category":"cpu","name":"CPU"}],"acpiTableNames":[]}"#
+        )
+
+        await assertThrowsErrorAsync {
+            try await JSONHardwareProfileImporter().importProfile(from: url)
+        } errorHandler: { error in
+            XCTAssertEqual(
+                error as? HardwareProfileImportError,
+                .invalidAppleModelIdentifier("Desktop1,1")
+            )
+        }
+    }
+
     func testRejectsSymbolicLink() async throws {
         let targetURL: URL = try writeReport(
-            #"{"schemaVersion":1,"devices":[{"category":"cpu","name":"CPU"}],"acpiTableNames":[]}"#
+            #"{"schemaVersion":1,"manufacturer":"Apple Inc.","platform":"intelMac","modelIdentifier":"iMac14,2","devices":[{"category":"cpu","name":"CPU"}],"acpiTableNames":[]}"#
         )
         let linkURL: URL = temporaryDirectory.appendingPathComponent("hardware-link.json")
         try FileManager.default.createSymbolicLink(at: linkURL, withDestinationURL: targetURL)
