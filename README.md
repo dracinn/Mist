@@ -12,8 +12,10 @@ The current development version is **0.1**.
 - Discover existing EFI partitions without mounting or changing them.
 - Import and review a local Apple Mac hardware report in JSON format.
 - Model native Intel Mac, OCLP Intel Mac, and native Apple-silicon installer paths separately.
+- Open a visible Multi-OS Setup screen with official Windows 10/11, Ubuntu, Fedora, and Debian resources for Intel Macs.
+- Review Fedora Asahi Remix setup resources for supported Apple-silicon Macs.
 
-The multi-installer interface is currently **preview only**. It does not erase, partition, mount, install, or modify OpenCore/OCLP data.
+The multi-installer interface is currently **preview only**. External operating-system entries open official download and setup pages. The app does not erase, partition, mount, run remote installers, install another operating system, or modify OpenCore/OCLP data.
 
 ## Hardware scope
 
@@ -22,7 +24,9 @@ Supported development targets are:
 - Apple Intel Macs
 - Apple-silicon Macs
 
-Generic PCs, Hackintosh systems, non-Apple SMBIOS identities, and arbitrary OpenCore configurations are not supported. OpenCore Legacy Patcher is treated only as a compatibility path for eligible Intel Macs. Apple silicon always uses Apple's native installer or restore path.
+Generic PCs, Hackintosh systems, non-Apple SMBIOS identities, and arbitrary OpenCore configurations are not supported. OpenCore Legacy Patcher is treated only as a compatibility path for eligible Intel Macs. Apple silicon uses Apple's native path for macOS and the official Asahi path for supported Linux installations.
+
+Windows and standard Linux x86-64 resources are shown only for Intel Macs. Apple documents Boot Camp support for Windows 10, not Windows 11. Linux driver and boot support varies by Mac model. Fedora Asahi Remix support is model-specific and must be confirmed from the official Asahi project before setup.
 
 ## Hardware report format
 
