@@ -99,7 +99,8 @@ final class UniversalInstallerTests: XCTestCase {
     }
 
     func testMultiOSResourcesKeepArchitectureBoundaries() {
-        let linuxNames: Set<String> = Set(OperatingSystemResource.intelLinuxOptions.map(\.name))
+        let orderedLinuxNames: [String] = OperatingSystemResource.intelLinuxOptions.map(\.name)
+        let linuxNames: Set<String> = Set(orderedLinuxNames)
 
         XCTAssertEqual(
             linuxNames,
@@ -110,7 +111,9 @@ final class UniversalInstallerTests: XCTestCase {
                 "antiX", "Puppy Linux", "Bodhi Linux", "Peppermint OS", "Alpine Linux", "elementary OS"
             ]
         )
+        XCTAssertEqual(orderedLinuxNames, orderedLinuxNames.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending })
         XCTAssertEqual(linuxNames.count, OperatingSystemResource.intelLinuxOptions.count)
+        XCTAssertTrue(OperatingSystemResource.intelMacOptions.allSatisfy { !$0.summary.isEmpty })
         XCTAssertEqual(OperatingSystemResource.fedoraAsahi.architecture, "Apple Silicon / ARM64")
         XCTAssertTrue(
             OperatingSystemResource.intelMacOptions

@@ -788,6 +788,10 @@ struct Installer: Decodable, Hashable, Identifiable {
         version.range(of: "^(1[1-5]|2[6-7])\\.", options: .regularExpression) != nil
     }
 
+    var supportsIntelMacs: Bool {
+        version.range(of: "^27\\.", options: .regularExpression) == nil
+    }
+
     var beta: Bool {
         build.range(of: "[a-z]$", options: .regularExpression) != nil
     }

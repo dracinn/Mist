@@ -9,6 +9,16 @@ import Blessed
 import SwiftUI
 import System
 
+// swiftlint:disable file_length
+
+/// Visual contexts supported by catalog action rows.
+enum CatalogRowPresentation {
+    /// The original Mist list row.
+    case standard
+    /// A compact row aligned to the workspace catalog columns.
+    case catalogTable
+}
+
 // swiftlint:disable:next type_body_length
 struct ListRowInstaller: View {
     @AppStorage("cacheDownloads")
@@ -41,6 +51,7 @@ struct ListRowInstaller: View {
     @Binding var openPanel: NSOpenPanel
     @Binding var tasksInProgress: Bool
     @ObservedObject var taskManager: TaskManager
+    var presentation: CatalogRowPresentation = .standard
     @State private var alertType: InstallerAlertType = .compatibility
     @State private var showAlert: Bool = false
     @State private var sheetType: InstallerSheetType = .download
@@ -73,6 +84,35 @@ struct ListRowInstaller: View {
     }
 
     var body: some View {
+        rowContent
+            .alert(isPresented: $showAlert) {
+                alert(for: alertType)
+            }
+            .onChange(of: showOpenPanel) { boolean in
+                if boolean {
+                    open()
+                }
+            }
+            .onChange(of: volume) { volume in
+                if volume != nil {
+                    createBootableInstaller()
+                }
+            }
+            .sheet(isPresented: $showSheet) {
+                InstallerVolumeSelectionView(volume: $volume)
+            }
+    }
+
+    @ViewBuilder private var rowContent: some View {
+        switch presentation {
+        case .standard:
+            standardRow
+        case .catalogTable:
+            catalogTableRow
+        }
+    }
+
+    private var standardRow: some View {
         // swiftlint:disable:next closure_body_length
         HStack {
             ListRowDetail(
@@ -109,22 +149,74 @@ struct ListRowInstaller: View {
             }
             .clipShape(Capsule())
         }
-        .alert(isPresented: $showAlert) {
-            alert(for: alertType)
-        }
-        .onChange(of: showOpenPanel) { boolean in
-            if boolean {
-                open()
+    }
+
+    private var catalogTableRow: some View {
+        // swiftlint:disable:next closure_body_length
+        HStack(spacing: 12) {
+            HStack(spacing: 10) {
+                ScaledImage(name: installer.imageName, length: 38)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(installer.name) \(installer.version)")
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+                    Text(installer.build)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
-        }
-        .onChange(of: volume) { volume in
-            if volume != nil {
-                createBootableInstaller()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Text("Full Installer")
+                .frame(width: 90, alignment: .leading)
+            Text(installer.date)
+                .frame(width: 92, alignment: .leading)
+            Text(installer.size.bytesString())
+                .frame(width: 72, alignment: .trailing)
+            HStack(spacing: 6) {
+                Button {
+                    pressButton(.download)
+                } label: {
+                    Image(systemName: "icloud.and.arrow.down")
+                }
+                .help("Download and export macOS Installer")
+                .disabled(tasksInProgress)
+                Button {
+                    pressButton(.volumeSelection)
+                } label: {
+                    Image(systemName: "externaldrive")
+                }
+                .help("Create bootable installer")
+                .disabled(tasksInProgress || !supportsBootableInstaller)
+                Button {
+                    copyDownloadLink()
+                } label: {
+                    Image(systemName: "link")
+                }
+                .help("Copy download link")
             }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .frame(width: 118)
         }
-        .sheet(isPresented: $showSheet) {
-            InstallerVolumeSelectionView(volume: $volume)
+        .font(.callout)
+        .padding(.vertical, 5)
+    }
+
+    private var supportsBootableInstaller: Bool {
+        guard let architecture: Architecture = Hardware.architecture else {
+            return false
         }
+
+        return (architecture == .appleSilicon && installer.bigSurOrNewer)
+            || (architecture == .intel && installer.mavericksOrNewer)
+    }
+
+    private func copyDownloadLink() {
+        let value: String = installer.distributionURL.isEmpty
+            ? installer.packages.first?.url ?? ""
+            : installer.distributionURL
+        NSPasteboard.general.declareTypes([.string], owner: nil)
+        NSPasteboard.general.setString(value, forType: .string)
     }
 
     private func pressButton(_ type: InstallerSheetType) {

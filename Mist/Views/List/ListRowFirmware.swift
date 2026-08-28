@@ -20,6 +20,7 @@ struct ListRowFirmware: View {
     @Binding var copiedToClipboard: Bool
     @Binding var tasksInProgress: Bool
     @ObservedObject var taskManager: TaskManager
+    var presentation: CatalogRowPresentation = .standard
     @State private var alertType: FirmwareAlertType = .compatibility
     @State private var showAlert: Bool = false
     @State private var showSavePanel: Bool = false
@@ -44,6 +45,48 @@ struct ListRowFirmware: View {
     }
 
     var body: some View {
+        rowContent
+            .alert(isPresented: $showAlert) {
+                switch alertType {
+                case .compatibility:
+                    Alert(
+                        title: Text("macOS Firmware not compatible!"),
+                        message: Text(compatibilityMessage),
+                        primaryButton: .default(Text("Cancel")),
+                        secondaryButton: .default(Text("Continue")) { Task { validate() } }
+                    )
+                case .helperTool:
+                    Alert(
+                        title: Text("Privileged Helper Tool not installed!"),
+                        message: Text("The Mist Privileged Helper Tool is required to perform Administrator tasks when downloading macOS Firmwares."),
+                        primaryButton: .default(Text("Install...")) { Task { installPrivilegedHelperTool() } },
+                        secondaryButton: .default(Text("Cancel"))
+                    )
+                case .error:
+                    Alert(
+                        title: Text("An error has occured!"),
+                        message: Text(errorMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
+            }
+            .onChange(of: showSavePanel) { boolean in
+                if boolean {
+                    save()
+                }
+            }
+    }
+
+    @ViewBuilder private var rowContent: some View {
+        switch presentation {
+        case .standard:
+            standardRow
+        case .catalogTable:
+            catalogTableRow
+        }
+    }
+
+    private var standardRow: some View {
         HStack {
             ListRowDetail(
                 imageName: firmware.imageName,
@@ -74,35 +117,50 @@ struct ListRowFirmware: View {
             }
             .clipShape(Capsule())
         }
-        .alert(isPresented: $showAlert) {
-            switch alertType {
-            case .compatibility:
-                Alert(
-                    title: Text("macOS Firmware not compatible!"),
-                    message: Text(compatibilityMessage),
-                    primaryButton: .default(Text("Cancel")),
-                    secondaryButton: .default(Text("Continue")) { Task { validate() } }
-                )
-            case .helperTool:
-                Alert(
-                    title: Text("Privileged Helper Tool not installed!"),
-                    message: Text("The Mist Privileged Helper Tool is required to perform Administrator tasks when downloading macOS Firmwares."),
-                    primaryButton: .default(Text("Install...")) { Task { installPrivilegedHelperTool() } },
-                    secondaryButton: .default(Text("Cancel"))
-                )
-            case .error:
-                Alert(
-                    title: Text("An error has occured!"),
-                    message: Text(errorMessage),
-                    dismissButton: .default(Text("OK"))
-                )
+    }
+
+    private var catalogTableRow: some View {
+        // swiftlint:disable:next closure_body_length
+        HStack(spacing: 12) {
+            HStack(spacing: 10) {
+                ScaledImage(name: firmware.imageName, length: 38)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(firmware.name) \(firmware.version)")
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+                    Text(firmware.build)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
-        }
-        .onChange(of: showSavePanel) { boolean in
-            if boolean {
-                save()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Text("Restore IPSW")
+                .frame(width: 90, alignment: .leading)
+            Text(firmware.formattedDate)
+                .frame(width: 92, alignment: .leading)
+            Text(firmware.size.bytesString())
+                .frame(width: 72, alignment: .trailing)
+            HStack(spacing: 6) {
+                Button {
+                    firmware.compatible ? validate() : showCompatibilityWarning()
+                } label: {
+                    Image(systemName: "icloud.and.arrow.down")
+                }
+                .help("Download macOS Firmware")
+                .disabled(tasksInProgress)
+                Button {
+                    copyToClipboard()
+                } label: {
+                    Image(systemName: "link")
+                }
+                .help("Copy macOS Firmware URL")
             }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .frame(width: 118)
         }
+        .font(.callout)
+        .padding(.vertical, 5)
     }
 
     private func copyToClipboard() {

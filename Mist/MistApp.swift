@@ -39,9 +39,6 @@ struct MistApp: App {
         .commands {
             AppCommands(sparkleUpdater: sparkleUpdater, refreshing: $refreshing, tasksInProgress: $tasksInProgress)
         }
-        Settings {
-            SettingsView(sparkleUpdater: sparkleUpdater)
-        }
         WindowGroup("Mist Log") {
             LogView(logEntries: logManager.logEntries)
                 .handlesExternalEvents(preferring: ["log"], allowing: ["*"])

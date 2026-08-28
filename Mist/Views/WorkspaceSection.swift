@@ -21,7 +21,7 @@ enum WorkspaceSection: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .catalog:
-            "Apple Catalog"
+            "Universal Catalog"
         case .installerPlanner:
             "Installer Planner"
         case .multiOS:
@@ -40,7 +40,7 @@ enum WorkspaceSection: String, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .catalog:
-            "macOS firmware and installers"
+            "macOS, Windows and Linux"
         case .installerPlanner:
             "Plan macOS media and disk layouts"
         case .multiOS:
