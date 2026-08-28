@@ -11,6 +11,7 @@ struct LogView: View {
     @AppStorage("logDetailLevel")
     private var detailLevel: LogLevel = .info
     var logEntries: [LogEntry]
+    var embedded: Bool = false
     @State private var selectedLogEntries: Set<LogEntry.ID> = []
     @State private var searchString: String = ""
     @State private var savePanel: NSSavePanel = .init()
@@ -63,6 +64,14 @@ struct LogView: View {
             .textSelection(.enabled)
             Divider()
             HStack {
+                Picker("Detail Level", selection: $detailLevel) {
+                    ForEach(LogLevel.allCases.reversed()) { logLevel in
+                        Text(logLevel.detailLevelDescription)
+                            .tag(logLevel)
+                    }
+                }
+                .frame(maxWidth: 220)
+
                 Spacer()
                 Button("Export Log...") {
                     export()
@@ -70,16 +79,14 @@ struct LogView: View {
             }
             .padding()
         }
-        .frame(minWidth: width, minHeight: height)
-        .toolbar {
-            Picker("Detail Level", selection: $detailLevel) {
-                ForEach(LogLevel.allCases.reversed()) { logLevel in
-                    Text(logLevel.detailLevelDescription)
-                        .tag(logLevel)
-                }
-            }
-            .help("Detail Level")
-        }
+        .frame(
+            minWidth: embedded ? 620 : width,
+            idealWidth: width,
+            maxWidth: embedded ? .infinity : width,
+            minHeight: embedded ? 480 : height,
+            idealHeight: height,
+            maxHeight: embedded ? .infinity : height
+        )
         .searchable(text: $searchString)
     }
 
@@ -115,5 +122,6 @@ struct LogView: View {
 struct LogView_Previews: PreviewProvider {
     static var previews: some View {
         LogView(logEntries: [.example])
+        LogView(logEntries: [.example], embedded: true)
     }
 }
