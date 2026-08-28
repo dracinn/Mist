@@ -143,6 +143,12 @@ extension OperatingSystemResource {
     )
 
     /// Creates a compact Intel Linux download entry.
+    ///
+    /// - Parameters:
+    ///   - name:         The distribution name.
+    ///   - downloadPage: The distribution's official download page.
+    ///
+    /// - Returns: A compact x86-64 Linux resource.
     private static func intelLinuxResource(name: String, downloadPage: String) -> OperatingSystemResource {
         .init(
             name: name,
