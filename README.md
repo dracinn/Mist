@@ -1,97 +1,51 @@
-<!-- markdownlint-disable-next-line first-line-heading no-inline-html  -->
-<img align="left" width="128" height="128" src="README%20Resources/App%20Icon.png" alt="App Icon">
+# Mist Universal
 
-# MIST - macOS Installer Super Tool
+Mist Universal is a macOS installer workspace for genuine Apple computers. It is being developed to preview and eventually create external drives containing multiple macOS installers, with distinct support paths for Intel Macs and Apple-silicon Macs.
 
-![Latest Release](https://img.shields.io/github/v/release/ninxsoft/Mist?display_name=tag&label=Latest%20Release&sort=semver) ![Downloads](https://img.shields.io/github/downloads/ninxsoft/Mist/total?label=Downloads) [![Linting](https://github.com/ninxsoft/Mist/actions/workflows/linting.yml/badge.svg)](https://github.com/ninxsoft/Mist/actions/workflows/linting.yml) [![Unit Tests](https://github.com/ninxsoft/Mist/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/ninxsoft/Mist/actions/workflows/unit_tests.yml) [![Build](https://github.com/ninxsoft/Mist/actions/workflows/build.yml/badge.svg)](https://github.com/ninxsoft/Mist/actions/workflows/build.yml)
+The current development version is **0.1**.
 
-A Mac utility that automatically downloads macOS Firmwares / Installers:
+## Version 0.1
 
-![Example Screenshot](README%20Resources/Example.png)
+- Browse Apple's macOS installer and firmware catalogs using Mist's established download tools.
+- Select multiple macOS installers and preview their proposed partition layout.
+- Discover eligible external physical disks without modifying them.
+- Discover existing EFI partitions without mounting or changing them.
+- Import and review a local Apple Mac hardware report in JSON format.
+- Model native Intel Mac, OCLP Intel Mac, and native Apple-silicon installer paths separately.
 
-<!-- markdownlint-disable no-trailing-punctuation -->
+The multi-installer interface is currently **preview only**. It does not erase, partition, mount, install, or modify OpenCore/OCLP data.
 
-## :information_source: Check out [mist-cli](https://github.com/ninxsoft/mist-cli) for the companion command-line tool!
+## Hardware scope
 
-## ![Slack](README%20Resources/Slack.png) Check out [#mist](https://macadmins.slack.com/archives/CF0CFM5B7) on the [Mac Admins Slack](https://macadmins.slack.com) to discuss all things Mist!
+Supported development targets are:
 
-<!-- markdownlint-enable no-trailing-punctuation -->
-<!-- markdownlint-disable no-inline-html -->
+- Apple Intel Macs
+- Apple-silicon Macs
 
-<a href="https://www.buymeacoffee.com/ninxsoft"><img width="214" height="60" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee"></a>
+Generic PCs, Hackintosh systems, non-Apple SMBIOS identities, and arbitrary OpenCore configurations are not supported. OpenCore Legacy Patcher is treated only as a compatibility path for eligible Intel Macs. Apple silicon always uses Apple's native installer or restore path.
 
-<!-- markdownlint-enable no-inline-html -->
+## Hardware report format
 
-## Features
+Version 0.1 accepts a local JSON report containing an Apple manufacturer, platform, model identifier, and device list. Imports are read-only and reject remote URLs, symbolic links, oversized files, non-Apple manufacturers, and invalid Apple-style model identifiers.
 
-- [x] List all available macOS Firmwares / Installers available for download:
-  - Display names, versions, builds, release dates and sizes
-  - Optionally show beta versions of macOS
-  - Filter macOS versions that are compatible with the Mac the app is being run from
-  - Export lists as **CSV**, **JSON**, **Property List** or **YAML**
-- [x] Download available macOS Firmwares / Installers:
-  - For Apple Silicon Macs:
-    - Download a Firmware Restore file (.ipsw)
-    - Validates the SHA-1 checksum upon download
-    - Copy firmware URLs to clipboard
-  - For Intel based Macs (Universal for macOS Big Sur and later):
-    - Generate an Application Bundle (.app)
-    - Generate a Disk Image (.dmg)
-    - Generate a Bootable Disk Image (.iso)
-      - For use with virtualization software (ie. Parallels Desktop, UTM, VMware Fusion, VirtualBox)
-    - Generate a macOS Installer Package (.pkg)
-      - Supports packages on **macOS Big Sur and newer** with a massive 12GB+ payload!
-    - Optionally codesign Disk Images and macOS Installer Packages
-    - Cache downloads to speed up build operations
-    - Select custom Software Update Catalogs, allowing you to list and download macOS Installers from the following:
-      - **Standard:** The default catalog that ships with macOS
-      - **Customer Seed:** The catalog available as part of the [AppleSeed Program](https://appleseed.apple.com/)
-      - **Developer Seed:** The catalog available as part of the [Apple Developer Program](https://developer.apple.com/programs/)
-      - **Public Seed:** The catalog available as part of the [Apple Beta Software Program](https://beta.apple.com/)
-      - **Note:** Catalogs from the Seed Programs may contain beta / unreleased versions of macOS. Ensure you are a member of these programs before proceeding.
-    - Validates the Chunklist checksums upon download
-  - Automatic retries for failed downloads!
+See [the architecture document](docs/UNIVERSAL_INSTALLER_ARCHITECTURE.md) for the current schema, boundaries, and safety model.
 
-**Note:** Depending on what **Mist** downloads, you may require allowing **Full Disk Access** for **Mist** via [System Settings](https://support.apple.com/en-us/guide/mac-help/mh15217/13.0/mac/13.0):
+## Building
 
-![Full Disk Access](README%20Resources/Full%20Disk%20Access.png)
+- Xcode 26
+- Swift 6.3.1
+- macOS Monterey 12 or later
 
-## Build Requirements
+Automatic application updates are disabled for development builds. Builds and source updates come from this repository.
 
-- Swift **6.3.1** | Xcode **26.0**.
-- Runs on macOS Monterey **12.0** and later.
+## Upstream and credits
 
-## Download
+This project is based on [Mist](https://github.com/ninxsoft/Mist), created and maintained upstream by [Nindi Gill / Ninxsoft](https://github.com/ninxsoft). Mist provides the application foundation, Apple catalog support, downloads, validation, exports, caching, and privileged-helper architecture.
 
-- Grab the latest version of **Mist** from the [releases page](https://github.com/ninxsoft/Mist/releases).
-- Alternatively, install via [Homebrew](https://brew.sh) by running `brew install --cask mist`
+[OpenCore Legacy Patcher](https://github.com/dortania/OpenCore-Legacy-Patcher) is the primary compatibility reference for supported legacy Intel Macs. The archived [OCLP-Mod](https://github.com/laobamac/OCLP-Mod) project is consulted only as a historical interface and compatibility reference; its PC/Hackintosh features, services, and binaries are not used.
 
-## Credits / Thank You
-
-- Project created and maintained by Nindi Gill ([ninxsoft](https://github.com/ninxsoft)).
-- JP Simard ([jpsim](https://github.com/jpsim)) for [Yams](https://github.com/jpsim/Yams), used to export lists as YAML.
-- Josh Kaplan ([jakaplan](https://github.com/jakaplan)) for [Blessed](https://github.com/trilemma-dev/Blessed) and [SecureXPC](https://github.com/trilemma-dev/SecureXPC), which are used to support the Privileged Helper Tool.
-- The Sparkle Project ([sparkle-project](https://github.com/sparkle-project)) for [Sparkle](https://github.com/sparkle-project/Sparkle), used to auto update Mist.
-- Callum Jones ([cj123](https://github.com/cj123)) for [IPSW Downloads API](https://ipswdownloads.docs.apiary.io), used to determine macOS Firmware metadata.
+Additional upstream dependencies and contributors remain credited in their source repositories and license notices.
 
 ## License
 
-> Copyright © 2021-2026 Nindi Gill
->
-> Permission is hereby granted, free of charge, to any person obtaining a copy
-> of this software and associated documentation files (the "Software"), to deal
-> in the Software without restriction, including without limitation the rights
-> to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-> copies of the Software, and to permit persons to whom the Software is
-> furnished to do so, subject to the following conditions:
->
-> The above copyright notice and this permission notice shall be included in all
-> copies or substantial portions of the Software.
->
-> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-> IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-> FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-> AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-> LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-> OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-> SOFTWARE.
+Mist Universal retains Mist's MIT license and upstream copyright notice. See [LICENSE](LICENSE) for details. Project names and third-party components remain the property of their respective owners.

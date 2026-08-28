@@ -19,6 +19,7 @@ struct SettingsGeneralUpdatesView: View {
                 Toggle(isOn: $enable) {
                     Text("Automatically check app updates:")
                 }
+                .disabled(true)
                 Picker("Scheduled Check Interval", selection: $interval) {
                     Text("Once a day")
                         .tag(86_400)
@@ -30,14 +31,15 @@ struct SettingsGeneralUpdatesView: View {
                         .tag(86_400 * 30)
                 }
                 .labelsHidden()
-                .disabled(!enable)
+                .disabled(true)
                 .frame(width: width)
                 Spacer()
                 Button("Check now...") {
                     checkForUpdates()
                 }
+                .disabled(!sparkleUpdater.canCheckForUpdates)
             }
-            FooterText("You will be notified and given the option to proceed when an update is available.")
+            FooterText("Automatic updates are disabled for this 0.1 development build. Use the project repository for new builds.")
         }
     }
 

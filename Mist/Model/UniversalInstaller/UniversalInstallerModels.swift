@@ -8,15 +8,15 @@ import Foundation
 
 enum BootStrategy: String, Codable, CaseIterable, Sendable {
     case nativeMacIntel
-    case openCore
+    case openCoreLegacyPatcher
     case appleSilicon
 
     var description: String {
         switch self {
         case .nativeMacIntel:
             "Native Intel Mac"
-        case .openCore:
-            "OpenCore"
+        case .openCoreLegacyPatcher:
+            "OCLP — Intel Mac"
         case .appleSilicon:
             "Apple Silicon"
         }

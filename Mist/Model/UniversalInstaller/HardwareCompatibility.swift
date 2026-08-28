@@ -4,6 +4,20 @@
 
 import Foundation
 
+enum AppleHardwarePlatform: String, Codable, CaseIterable, Sendable {
+    case intelMac
+    case appleSiliconMac
+
+    var description: String {
+        switch self {
+        case .intelMac:
+            "Intel Mac"
+        case .appleSiliconMac:
+            "Apple silicon Mac"
+        }
+    }
+}
+
 enum HardwareCategory: String, Codable, CaseIterable, Sendable {
     case cpu
     case gpu
@@ -53,6 +67,9 @@ struct HardwareDevice: Identifiable, Codable, Hashable, Sendable {
 
 struct HardwareProfile: Codable, Hashable, Sendable {
     var schemaVersion: Int = 1
+    var manufacturer: String
+    var platform: AppleHardwarePlatform
+    var modelIdentifier: String
     var modelName: String?
     var boardName: String?
     var devices: [HardwareDevice]
