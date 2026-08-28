@@ -98,6 +98,38 @@ final class UniversalInstallerTests: XCTestCase {
         XCTAssertGreaterThan(preview.remainingBytes, 0)
     }
 
+    func testMultiOSResourcesKeepArchitectureBoundaries() {
+        let intelNames: Set<String> = Set(OperatingSystemResource.intelMacOptions.map(\.name))
+
+        XCTAssertEqual(
+            intelNames,
+            ["Windows 10", "Windows 11", "Ubuntu Desktop", "Fedora Workstation", "Debian"]
+        )
+        XCTAssertEqual(OperatingSystemResource.fedoraAsahi.architecture, "Apple Silicon / ARM64")
+        XCTAssertTrue(
+            OperatingSystemResource.intelMacOptions
+                .first { $0.name == "Windows 11" }?
+                .supportNote.contains("Not an Apple-supported Boot Camp target") == true
+        )
+    }
+
+    func testMultiOSResourcesUseSecureOfficialLinks() {
+        let resources: [OperatingSystemResource] = OperatingSystemResource.intelMacOptions + [
+            .openCoreLegacyPatcher,
+            .fedoraAsahi
+        ]
+
+        for resource in resources {
+            let downloadURL: URL? = URL(string: resource.downloadPage)
+            let guideURL: URL? = URL(string: resource.setupGuide)
+
+            XCTAssertEqual(downloadURL?.scheme, "https", resource.name)
+            XCTAssertNotNil(downloadURL?.host, resource.name)
+            XCTAssertEqual(guideURL?.scheme, "https", resource.name)
+            XCTAssertNotNil(guideURL?.host, resource.name)
+        }
+    }
+
     func testPlanIncludesEFIAndMultipleMacOSInstallers() throws {
         let tahoe: InstallerTarget = .init(
             name: "Install macOS Tahoe",

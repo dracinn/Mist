@@ -75,7 +75,9 @@ Hardware profiles can be imported from a local, versioned JSON report. Import is
 
 OCLP must never be treated as the Apple-silicon boot path. Generic OpenCore configuration generation, non-Apple SMBIOS identities, PC ACPI customization, and Hackintosh kext selection are explicitly excluded.
 
-Linux, Windows, generic UEFI PCs, Hackintosh systems, Asahi, shared data partitions, and arbitrary custom media are intentionally excluded or deferred.
+The visible Multi-OS Setup screen may provide official, external resources for Windows 10/11 and x86-64 Linux distributions on Intel Macs, plus Fedora Asahi Remix on supported Apple-silicon Macs. This resource layer does not download images directly, run installers, or add those operating systems to the disk planner yet.
+
+Generic UEFI PCs, Hackintosh systems, shared data partitions, and arbitrary custom media remain excluded. Windows 11 is clearly marked as outside Apple's supported Boot Camp path, while Asahi setup remains user-initiated through the official project.
 
 ## Suggested build flow
 
@@ -98,4 +100,5 @@ Linux, Windows, generic UEFI PCs, Hackintosh systems, Asahi, shared data partiti
 - Add an explicit, privileged EFI mounting abstraction after a dedicated safety review.
 - Add a macOS provider wrapping Mist's existing installer creation path.
 - Add an OCLP supported-model data adapter with source/version provenance.
+- Add verified download metadata providers before bringing Windows, Linux, or Asahi payloads into the planner.
 - Add a second, explicit safety review before any future disk-writing implementation is designed.

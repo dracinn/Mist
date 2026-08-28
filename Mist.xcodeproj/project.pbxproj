@@ -159,6 +159,8 @@
 		AB0000010000000000000003 /* HardwareProfileImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000010000000000000004 /* HardwareProfileImporterTests.swift */; };
 		EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */; };
 		EE0000010000000000000007 /* HardwareProfileReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000007 /* HardwareProfileReviewView.swift */; };
+		A90000010000000000000001 /* OperatingSystemResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90000010000000000000002 /* OperatingSystemResource.swift */; };
+		A90000010000000000000003 /* MultiOSSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90000010000000000000004 /* MultiOSSetupView.swift */; };
 		EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */; };
 		EE0000010000000000000004 /* PhysicalDiskDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */; };
 		EE0000010000000000000005 /* DiskutilEFIPartitionDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */; };
@@ -340,6 +342,8 @@
 		AB0000010000000000000004 /* HardwareProfileImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareProfileImporterTests.swift; sourceTree = "<group>"; };
 		FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalInstallerPreviewView.swift; sourceTree = "<group>"; };
 		FF0000010000000000000007 /* HardwareProfileReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareProfileReviewView.swift; sourceTree = "<group>"; };
+		A90000010000000000000002 /* OperatingSystemResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperatingSystemResource.swift; sourceTree = "<group>"; };
+		A90000010000000000000004 /* MultiOSSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiOSSetupView.swift; sourceTree = "<group>"; };
 		FF0000010000000000000002 /* DiskutilPhysicalDiskDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskutilPhysicalDiskDiscovery.swift; sourceTree = "<group>"; };
 		FF0000010000000000000003 /* PhysicalDiskDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicalDiskDiscoveryTests.swift; sourceTree = "<group>"; };
 		FF0000010000000000000004 /* DiskutilEFIPartitionDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskutilEFIPartitionDiscovery.swift; sourceTree = "<group>"; };
@@ -525,6 +529,7 @@
 		EE0000010000000000000002 /* UniversalInstaller */ = {
 			isa = PBXGroup;
 			children = (
+				A90000010000000000000004 /* MultiOSSetupView.swift */,
 				FF0000010000000000000007 /* HardwareProfileReviewView.swift */,
 				FF0000010000000000000001 /* UniversalInstallerPreviewView.swift */,
 			);
@@ -650,6 +655,7 @@
 		CC0000010000000000000001 /* UniversalInstaller */ = {
 			isa = PBXGroup;
 			children = (
+				A90000010000000000000002 /* OperatingSystemResource.swift */,
 				BB0000010000000000000002 /* HardwareCompatibility.swift */,
 				BB0000010000000000000001 /* UniversalInstallerModels.swift */,
 			);
@@ -893,6 +899,8 @@
 				AB0000010000000000000001 /* JSONHardwareProfileImporter.swift in Sources */,
 				EE0000010000000000000001 /* UniversalInstallerPreviewView.swift in Sources */,
 				EE0000010000000000000007 /* HardwareProfileReviewView.swift in Sources */,
+				A90000010000000000000001 /* OperatingSystemResource.swift in Sources */,
+				A90000010000000000000003 /* MultiOSSetupView.swift in Sources */,
 				EE0000010000000000000005 /* DiskutilEFIPartitionDiscovery.swift in Sources */,
 				EE0000010000000000000003 /* DiskutilPhysicalDiskDiscovery.swift in Sources */,
 				39FF05F02859848500A86670 /* SettingsView.swift in Sources */,
