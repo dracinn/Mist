@@ -158,22 +158,34 @@ struct MacDevicesWorkspaceView: View {
         discoveryError = nil
         defer { discovering = false }
 
+        let discovered: [PhysicalDisk]
+
         do {
-            let discovered: [PhysicalDisk] = try await DiskutilPhysicalDiskDiscovery().externalPhysicalDisks()
-            var partitions: [EFIPartition] = []
-
-            for disk in discovered {
-                let diskPartitions: [EFIPartition] = try await DiskutilEFIPartitionDiscovery()
-                    .efiPartitions(on: disk.identifier)
-                partitions.append(contentsOf: diskPartitions)
-            }
-
-            disks = discovered
-            efiPartitions = partitions
+            discovered = try await DiskutilPhysicalDiskDiscovery().externalPhysicalDisks()
         } catch {
             disks = []
             efiPartitions = []
             discoveryError = error.localizedDescription
+            return
+        }
+
+        disks = discovered
+        var partitions: [EFIPartition] = []
+        var inspectionFailures: [String] = []
+
+        for disk in discovered {
+            do {
+                let diskPartitions: [EFIPartition] = try await DiskutilEFIPartitionDiscovery()
+                    .efiPartitions(on: disk.identifier)
+                partitions.append(contentsOf: diskPartitions)
+            } catch {
+                inspectionFailures.append("\(disk.identifier): \(error.localizedDescription)")
+            }
+        }
+
+        efiPartitions = partitions
+        if !inspectionFailures.isEmpty {
+            discoveryError = "Some EFI partitions could not be inspected. \(inspectionFailures.joined(separator: " "))"
         }
     }
 }

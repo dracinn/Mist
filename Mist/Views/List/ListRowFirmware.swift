@@ -23,7 +23,6 @@ struct ListRowFirmware: View {
     @State private var alertType: FirmwareAlertType = .compatibility
     @State private var showAlert: Bool = false
     @State private var showSavePanel: Bool = false
-    @State private var downloading: Bool = false
     @State private var error: Error?
     private let length: CGFloat = 48
     private let spacing: CGFloat = 5
@@ -64,6 +63,7 @@ struct ListRowFirmware: View {
                 }
                 .help("Download macOS Firmware")
                 .buttonStyle(.mistAction)
+                .disabled(tasksInProgress)
                 Button {
                     copyToClipboard()
                 } label: {
@@ -103,18 +103,6 @@ struct ListRowFirmware: View {
                 save()
             }
         }
-        .sheet(isPresented: $downloading) {
-            ActivityView(
-                downloadType: .firmware,
-                imageName: firmware.imageName,
-                name: firmware.name,
-                version: firmware.version,
-                build: firmware.build,
-                beta: firmware.beta,
-                destinationURL: savePanel.url,
-                taskManager: taskManager
-            )
-        }
     }
 
     private func copyToClipboard() {
@@ -141,8 +129,19 @@ struct ListRowFirmware: View {
             }
 
             taskManager.taskGroups = try TaskManager.taskGroups(for: firmware, destination: savePanel.url, retries: retries, delay: retryDelay)
-            downloading = true
             tasksInProgress = true
+            ActivityWindowPresenter.present(
+                downloadType: .firmware,
+                imageName: firmware.imageName,
+                name: firmware.name,
+                version: firmware.version,
+                build: firmware.build,
+                beta: firmware.beta,
+                destinationURL: savePanel.url,
+                taskManager: taskManager
+            ) {
+                tasksInProgress = false
+            }
         }
     }
 

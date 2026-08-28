@@ -92,6 +92,7 @@ struct ListRowInstaller: View {
                 }
                 .help("Download and export macOS Installer")
                 .buttonStyle(.mistAction)
+                .disabled(tasksInProgress)
                 if
                     let architecture: Architecture = Hardware.architecture,
                     (architecture == .appleSilicon && installer.bigSurOrNewer) || (architecture == .intel && installer.mavericksOrNewer) {
@@ -103,6 +104,7 @@ struct ListRowInstaller: View {
                     }
                     .help("Create bootable macOS Installer")
                     .buttonStyle(.mistAction)
+                    .disabled(tasksInProgress)
                 }
             }
             .clipShape(Capsule())
@@ -120,34 +122,8 @@ struct ListRowInstaller: View {
                 createBootableInstaller()
             }
         }
-        .onChange(of: sheetType) { _ in } // hack to make cascading sheets work
         .sheet(isPresented: $showSheet) {
-            switch sheetType {
-            case .download:
-                ActivityView(
-                    downloadType: .installer,
-                    imageName: installer.imageName,
-                    name: installer.name.replacingOccurrences(of: " beta", with: ""),
-                    version: installer.version,
-                    build: installer.build,
-                    beta: installer.beta,
-                    destinationURL: openPanel.url,
-                    taskManager: taskManager
-                )
-            case .volumeSelection:
-                InstallerVolumeSelectionView(volume: $volume)
-            case .createBootableInstaller:
-                ActivityView(
-                    downloadType: .installer,
-                    imageName: installer.imageName,
-                    name: installer.name.replacingOccurrences(of: " beta", with: ""),
-                    version: installer.version,
-                    build: installer.build,
-                    beta: installer.beta,
-                    destinationURL: URL(fileURLWithPath: "/Volumes/Install \(installer.name)"),
-                    taskManager: taskManager
-                )
-            }
+            InstallerVolumeSelectionView(volume: $volume)
         }
     }
 
@@ -197,8 +173,8 @@ struct ListRowInstaller: View {
                 packageSigningIdentity: packageSigningIdentity
             )
 
-            showSheet = true
             tasksInProgress = true
+            presentActivity(destinationURL: openPanel.url)
         }
     }
 
@@ -217,9 +193,23 @@ struct ListRowInstaller: View {
                 volume: volume
             )
 
-            sheetType = .createBootableInstaller
-            showSheet = true
             tasksInProgress = true
+            presentActivity(destinationURL: URL(fileURLWithPath: "/Volumes/Install \(installer.name)"))
+        }
+    }
+
+    private func presentActivity(destinationURL: URL?) {
+        ActivityWindowPresenter.present(
+            downloadType: .installer,
+            imageName: installer.imageName,
+            name: installer.name.replacingOccurrences(of: " beta", with: ""),
+            version: installer.version,
+            build: installer.build,
+            beta: installer.beta,
+            destinationURL: destinationURL,
+            taskManager: taskManager
+        ) {
+            tasksInProgress = false
         }
     }
 

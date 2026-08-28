@@ -8,12 +8,73 @@
 import Combine
 import SwiftUI
 
+/// Presents task progress in a window that does not block the main workspace.
+@MainActor
+enum ActivityWindowPresenter {
+    /// Activity windows retained while their operations are visible.
+    private static var windows: [NSWindow] = []
+
+    // swiftlint:disable function_parameter_count
+    /// Opens a non-blocking activity window for the prepared task queue.
+    ///
+    /// - Parameters:
+    ///   - downloadType: The kind of Apple content being processed.
+    ///   - imageName: The system image displayed for the operation.
+    ///   - name: The release name displayed in the activity header.
+    ///   - version: The release version displayed in the activity header.
+    ///   - build: The release build displayed in the activity header.
+    ///   - beta: Whether the selected release is a beta.
+    ///   - destinationURL: The operation's output location, when available.
+    ///   - taskManager: The shared manager containing the prepared task queue.
+    ///   - onClose: Work to perform after the activity window closes.
+    static func present(
+        downloadType: DownloadType,
+        imageName: String,
+        name: String,
+        version: String,
+        build: String,
+        beta: Bool,
+        destinationURL: URL?,
+        taskManager: TaskManager,
+        onClose: @escaping () -> Void
+    ) {
+        var activityWindow: NSWindow?
+        let content: ActivityView = .init(
+            downloadType: downloadType,
+            imageName: imageName,
+            name: name,
+            version: version,
+            build: build,
+            beta: beta,
+            destinationURL: destinationURL,
+            taskManager: taskManager
+        ) {
+            guard let window = activityWindow else {
+                return
+            }
+
+            onClose()
+            window.close()
+            windows.removeAll { $0 === window }
+        }
+        let hostingController: NSHostingController<ActivityView> = .init(rootView: content)
+        let window: NSWindow = .init(contentViewController: hostingController)
+        activityWindow = window
+        window.title = "Mist Activity"
+        window.styleMask = [.titled, .miniaturizable]
+        window.isReleasedWhenClosed = false
+        window.center()
+        windows.append(window)
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    // swiftlint:enable function_parameter_count
+}
+
 struct ActivityView: View {
     // swiftlint:disable:next weak_delegate
     @NSApplicationDelegateAdaptor(AppDelegate.self)
     var appDelegate: AppDelegate
-    @Environment(\.presentationMode)
-    var presentationMode: Binding<PresentationMode>
     @AppStorage("enableNotifications")
     private var enableNotifications: Bool = false
     @AppStorage("showInFinder")
@@ -26,6 +87,7 @@ struct ActivityView: View {
     var beta: Bool
     var destinationURL: URL?
     @ObservedObject var taskManager: TaskManager
+    var onClose: () -> Void = {}
     @State private var currentTaskId: String?
     @State private var value: Double = 0
     @State private var showAlert: Bool = false
@@ -218,7 +280,7 @@ struct ActivityView: View {
             alertType = .cancel
             showAlert.toggle()
         case .complete, .error:
-            presentationMode.wrappedValue.dismiss()
+            onClose()
         }
     }
 
@@ -228,7 +290,7 @@ struct ActivityView: View {
         taskManager.cancelTask()
         ShellExecutor.shared.terminate()
         _ = Task { try await ProcessKiller.kill() }
-        presentationMode.wrappedValue.dismiss()
+        onClose()
     }
 }
 
