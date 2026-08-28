@@ -23,18 +23,24 @@ struct MultiOSSetupView: View {
                 Divider()
             }
 
-            HSplitView {
-                sidebar
+            if embedded {
+                embeddedNavigation
+                Divider()
                 detail
+            } else {
+                HSplitView {
+                    sidebar
+                    detail
+                }
             }
 
             Divider()
             safetyFooter
         }
         .frame(
-            minWidth: embedded ? 760 : 900,
+            minWidth: embedded ? 680 : 900,
             idealWidth: 900,
-            minHeight: embedded ? 560 : 660,
+            minHeight: embedded ? 540 : 660,
             idealHeight: 660
         )
         .sheet(isPresented: $showMacOSPlanner) {
@@ -48,7 +54,7 @@ struct MultiOSSetupView: View {
                 Text("Multi-OS Setup")
                     .font(.title2)
                     .fontWeight(.semibold)
-                Text("Official downloads and safe planning for Apple Intel and Apple-silicon Macs.")
+                Text("Official downloads and safe planning for genuine Intel and Apple Silicon Macs.")
                     .foregroundColor(.secondary)
             }
             Spacer()
@@ -60,9 +66,34 @@ struct MultiOSSetupView: View {
         .padding()
     }
 
+    private var embeddedNavigation: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Multi-OS Setup")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    Text("Mac hardware only — choose an Intel Mac or Apple Silicon workflow.")
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+            }
+
+            Picker("Platform", selection: $selection) {
+                ForEach(MultiOSSection.allCases) { section in
+                    Label(section.title, systemImage: section.systemImage)
+                        .tag(section)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+        }
+        .padding(20)
+    }
+
     private var sidebar: some View {
         List {
-            Section("Platforms") {
+            Section("Mac Platforms") {
                 ForEach(MultiOSSection.allCases) { section in
                     Button {
                         selection = section
@@ -143,8 +174,8 @@ struct MultiOSSetupView: View {
     private var intelSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
-                "Intel Mac Downloads — x86-64",
-                subtitle: "Official Windows and Linux download pages for Intel-based Macs."
+                "Intel Macs — x86-64",
+                subtitle: "Official Windows and Linux download pages for genuine Intel-based Macs."
             )
 
             Label(
@@ -184,8 +215,8 @@ struct MultiOSSetupView: View {
     private var appleSiliconSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
-                "Apple Silicon — ARM64",
-                subtitle: "Native Linux setup for supported Apple-silicon Macs through Asahi Linux."
+                "Apple Silicon Macs — ARM64",
+                subtitle: "Native Linux setup for supported Apple Silicon Macs through Asahi Linux."
             )
 
             operatingSystemCard(OperatingSystemResource.fedoraAsahi) {
@@ -198,7 +229,7 @@ struct MultiOSSetupView: View {
             }
 
             Label(
-                "Mist Universal never runs the Asahi installer automatically. Read the official model support and backup instructions first.",
+                "Mist Universal never runs the Asahi installer automatically. Read the official Mac model support and backup instructions first.",
                 systemImage: "checkmark.shield"
             )
             .foregroundColor(.secondary)
@@ -207,7 +238,7 @@ struct MultiOSSetupView: View {
 
     private var safetyFooter: some View {
         Label(
-            "Resource screen only — no downloads, scripts, partitions, or boot files are changed automatically.",
+            "Mac-only resource screen — no downloads, scripts, partitions, or boot files are changed automatically.",
             systemImage: "checkmark.shield"
         )
         .foregroundColor(.secondary)
