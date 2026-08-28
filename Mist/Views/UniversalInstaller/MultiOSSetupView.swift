@@ -11,22 +11,32 @@ struct MultiOSSetupView: View {
     @Environment(\.openURL)
     private var openURL: OpenURLAction
     var installers: [Installer]
+    var embedded: Bool = false
     @State private var selection: MultiOSSection = .macOS
     @State private var showMacOSPlanner: Bool = false
     @State private var copiedAsahiCommand: Bool = false
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            Divider()
+            if !embedded {
+                header
+                Divider()
+            }
+
             HSplitView {
                 sidebar
                 detail
             }
+
             Divider()
             safetyFooter
         }
-        .frame(width: 900, height: 660)
+        .frame(
+            minWidth: embedded ? 760 : 900,
+            idealWidth: 900,
+            minHeight: embedded ? 560 : 660,
+            idealHeight: 660
+        )
         .sheet(isPresented: $showMacOSPlanner) {
             UniversalInstallerPreviewView(installers: installers)
         }
@@ -52,20 +62,22 @@ struct MultiOSSetupView: View {
 
     private var sidebar: some View {
         List {
-            ForEach(MultiOSSection.allCases) { section in
-                Button {
-                    selection = section
-                } label: {
-                    HStack {
-                        Label(section.title, systemImage: section.systemImage)
-                        Spacer()
-                        if selection == section {
-                            Image(systemName: "checkmark")
+            Section("Platforms") {
+                ForEach(MultiOSSection.allCases) { section in
+                    Button {
+                        selection = section
+                    } label: {
+                        HStack {
+                            Label(section.title, systemImage: section.systemImage)
+                            Spacer()
+                            if selection == section {
+                                Image(systemName: "checkmark")
+                            }
                         }
+                        .contentShape(Rectangle())
                     }
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .listStyle(.sidebar)
@@ -84,10 +96,10 @@ struct MultiOSSetupView: View {
                     appleSiliconSection
                 }
             }
-            .padding()
+            .padding(24)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(minWidth: 600)
+        .frame(minWidth: 540)
     }
 
     private var macOSSection: some View {
@@ -199,13 +211,15 @@ struct MultiOSSetupView: View {
             systemImage: "checkmark.shield"
         )
         .foregroundColor(.secondary)
-        .padding()
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func sectionHeader(_ title: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.title3)
+                .font(.title2)
                 .fontWeight(.semibold)
             Text(subtitle)
                 .foregroundColor(.secondary)
