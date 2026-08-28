@@ -8,6 +8,40 @@
 import SwiftUI
 
 struct ContentView: View {
+    private enum WorkspaceSection: String, CaseIterable, Identifiable {
+        case catalog
+        case multiOS
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .catalog:
+                "Apple Catalog"
+            case .multiOS:
+                "Multi-OS Setup"
+            }
+        }
+
+        var subtitle: String {
+            switch self {
+            case .catalog:
+                "Firmwares and installers"
+            case .multiOS:
+                "macOS, OCLP, Windows and Linux"
+            }
+        }
+
+        var systemImage: String {
+            switch self {
+            case .catalog:
+                "square.stack.3d.down.right"
+            case .multiOS:
+                "externaldrive.connected.to.line.below"
+            }
+        }
+    }
+
     @Environment(\.openURL)
     var openURL: OpenURLAction
     @AppStorage("downloadType")
@@ -18,14 +52,15 @@ struct ContentView: View {
     private var showCompatible: Bool = false
     @Binding var refreshing: Bool
     @Binding var tasksInProgress: Bool
+    @State private var workspaceSection: WorkspaceSection = .catalog
     @State private var firmwares: [Firmware] = []
     @State private var installers: [Installer] = []
     @State private var searchString: String = ""
     @State private var openPanel: NSOpenPanel = .init()
     @State private var savePanel: NSSavePanel = .init()
     @State private var copiedToClipboard: Bool = false
-    @State private var showMultiOSSetup: Bool = false
     @StateObject private var taskManager: TaskManager = .shared
+
     private var filteredFirmwares: [Firmware] {
         var filteredFirmwares: [Firmware] = firmwares
 
@@ -74,53 +109,29 @@ struct ContentView: View {
         return filteredInstallers
     }
 
-    private let width: CGFloat = 480
+    private let width: CGFloat = 1080
     private let height: CGFloat = 720
 
     var body: some View {
-        // swiftlint:disable:next closure_body_length
         VStack(spacing: 0) {
-            HeaderView(downloadType: $downloadType)
+            workspaceHeader
             Divider()
-            if downloadType == .firmware && filteredFirmwares.isEmpty || downloadType == .installer && filteredInstallers.isEmpty {
-                EmptyCollectionView("No macOS \(downloadType.description)s found!\n\nಥ_ಥ")
-            } else {
-                ZStack {
-                    List {
-                        ForEach(releaseNames(for: downloadType), id: \.self) { releaseName in
-                            Section(header: Text(releaseName)) {
-                                switch downloadType {
-                                case .firmware:
-                                    ForEach(filteredFirmwares(for: releaseName)) { firmware in
-                                        ListRowFirmware(firmware: firmware, savePanel: $savePanel, copiedToClipboard: $copiedToClipboard, tasksInProgress: $tasksInProgress, taskManager: taskManager)
-                                            .tag(firmware)
-                                    }
-                                case .installer:
-                                    ForEach(filteredInstallers(for: releaseName)) { installer in
-                                        ListRowInstaller(installer: installer, openPanel: $openPanel, tasksInProgress: $tasksInProgress, taskManager: taskManager)
-                                            .tag(installer)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if copiedToClipboard {
-                        FloatingAlert(image: "list.bullet.clipboard.fill", message: "Copied to Clipboard")
-                    }
-                }
+            HSplitView {
+                workspaceSidebar
+                workspaceDetail
             }
-            Divider()
-            FooterView(includeBetas: $includeBetas, showCompatible: $showCompatible, downloadType: downloadType, firmwares: $firmwares, installers: $installers)
         }
-        .frame(width: width, height: height)
+        .frame(minWidth: 900, idealWidth: width, minHeight: 620, idealHeight: height)
         .toolbar {
             Button {
+                workspaceSection = .catalog
                 refresh()
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise")
                     .foregroundColor(.accentColor)
             }
-            .help("Refresh")
+            .help("Refresh Apple catalogs")
+
             Button {
                 showLog()
             } label: {
@@ -128,20 +139,10 @@ struct ContentView: View {
                     .foregroundColor(.accentColor)
             }
             .help("Show Mist Log")
-            Button {
-                showMultiOSSetup = true
-            } label: {
-                Label("Multi-OS Setup", systemImage: "square.stack.3d.up")
-                    .foregroundColor(.accentColor)
-            }
-            .help("Open macOS, OCLP, Windows, Linux, and Asahi setup resources")
         }
         .searchable(text: $searchString)
         .sheet(isPresented: $refreshing) {
             RefreshView(firmwares: $firmwares, installers: $installers)
-        }
-        .sheet(isPresented: $showMultiOSSetup) {
-            MultiOSSetupView(installers: filteredInstallers)
         }
         .onAppear {
             refresh()
@@ -156,6 +157,137 @@ struct ContentView: View {
                     copiedToClipboard = false
                 }
             }
+        }
+    }
+
+    private var workspaceHeader: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "macwindow.on.rectangle")
+                .font(.title2)
+                .foregroundColor(.accentColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Mist Universal")
+                    .font(.headline)
+                Text(workspaceSection.subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            if tasksInProgress {
+                Label("Task in progress", systemImage: "arrow.down.circle")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private var workspaceSidebar: some View {
+        List {
+            Section("Workspace") {
+                ForEach(WorkspaceSection.allCases) { section in
+                    Button {
+                        workspaceSection = section
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: section.systemImage)
+                                .frame(width: 18)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(section.title)
+                                Text(section.subtitle)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            if workspaceSection == section {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            Section("Catalog Status") {
+                Label("\(firmwares.count) firmwares", systemImage: "shippingbox")
+                    .font(.caption)
+                Label("\(installers.count) installers", systemImage: "macwindow")
+                    .font(.caption)
+            }
+        }
+        .listStyle(.sidebar)
+        .frame(minWidth: 220, idealWidth: 235, maxWidth: 270)
+    }
+
+    @ViewBuilder
+    private var workspaceDetail: some View {
+        switch workspaceSection {
+        case .catalog:
+            catalogView
+        case .multiOS:
+            MultiOSSetupView(installers: filteredInstallers, embedded: true)
+        }
+    }
+
+    private var catalogView: some View {
+        VStack(spacing: 0) {
+            HeaderView(downloadType: $downloadType)
+            Divider()
+
+            if downloadType == .firmware && filteredFirmwares.isEmpty || downloadType == .installer && filteredInstallers.isEmpty {
+                EmptyCollectionView("No macOS \(downloadType.description)s found!\n\nಥ_ಥ")
+            } else {
+                ZStack {
+                    List {
+                        ForEach(releaseNames(for: downloadType), id: \.self) { releaseName in
+                            Section(header: Text(releaseName)) {
+                                switch downloadType {
+                                case .firmware:
+                                    ForEach(filteredFirmwares(for: releaseName)) { firmware in
+                                        ListRowFirmware(
+                                            firmware: firmware,
+                                            savePanel: $savePanel,
+                                            copiedToClipboard: $copiedToClipboard,
+                                            tasksInProgress: $tasksInProgress,
+                                            taskManager: taskManager
+                                        )
+                                        .tag(firmware)
+                                    }
+                                case .installer:
+                                    ForEach(filteredInstallers(for: releaseName)) { installer in
+                                        ListRowInstaller(
+                                            installer: installer,
+                                            openPanel: $openPanel,
+                                            tasksInProgress: $tasksInProgress,
+                                            taskManager: taskManager
+                                        )
+                                        .tag(installer)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if copiedToClipboard {
+                        FloatingAlert(image: "list.bullet.clipboard.fill", message: "Copied to Clipboard")
+                    }
+                }
+            }
+
+            Divider()
+            FooterView(
+                includeBetas: $includeBetas,
+                showCompatible: $showCompatible,
+                downloadType: downloadType,
+                firmwares: $firmwares,
+                installers: $installers
+            )
         }
     }
 
