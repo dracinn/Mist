@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var sparkleUpdater: SparkleUpdater
+    var embedded: Bool = false
     private let width: CGFloat = 540
 
     var body: some View {
@@ -30,12 +31,19 @@ struct SettingsView: View {
             SettingsAboutView()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        .frame(width: width)
+        .frame(
+            minWidth: embedded ? 620 : width,
+            idealWidth: embedded ? 820 : width,
+            maxWidth: embedded ? .infinity : width,
+            minHeight: embedded ? 520 : nil,
+            maxHeight: embedded ? .infinity : nil
+        )
     }
 }
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView(sparkleUpdater: SparkleUpdater())
+        SettingsView(sparkleUpdater: SparkleUpdater(), embedded: true)
     }
 }
